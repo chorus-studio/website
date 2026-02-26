@@ -1,0 +1,23 @@
+@import 'tailwindcss';
+
+:root {
+    --chorus-green: #1db954;
+    --chorus-green-dark: #1aa34a;
+    --chorus-dark: #121212;
+    --chorus-card: #181818;
+    --chorus-text: #ffffff;
+    --chorus-subtext: #b3b3b3;
+}
+
+/* Override Starlight theme colors for Chorus branding */
+:root {
+    --sl-color-accent-low: #0d3320;
+    --sl-color-accent: #1db954;
+    --sl-color-accent-high: #8ff0b5;
+}
+
+:root[data-theme='light'] {
+    --sl-color-accent-low: #c8f5d8;
+    --sl-color-accent: #0f7b35;
+    --sl-color-accent-high: #093d1a;
+}

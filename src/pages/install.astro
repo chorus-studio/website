@@ -1,0 +1,125 @@
+---
+import Landing from '../layouts/Landing.astro'
+
+const quickStartSteps = [
+    {
+        step: '1',
+        title: 'Open Spotify',
+        description: 'Head to open.spotify.com in your browser and play any track.'
+    },
+    {
+        step: '2',
+        title: 'Open Chorus Controls',
+        description:
+            'Click the Chorus icon in your toolbar, or use the settings gear icon that appears on the Spotify player bar.'
+    },
+    {
+        step: '3',
+        title: 'Explore Features',
+        description:
+            'Navigate between Snip, Speed, Seek, EQ, Reverb, and MS tabs to customize your listening experience.'
+    }
+]
+
+const highlights = [
+    {
+        title: 'Save Favorite Sections',
+        description: 'Use Snips to save and loop the best parts of any track — chorus, verse, bridge, or drop.',
+        link: '/features/snips/'
+    },
+    {
+        title: 'Block Unwanted Tracks',
+        description: 'Never hear a song you dislike again. Block tracks from any view in Spotify.',
+        link: '/features/auto-skip/'
+    },
+    {
+        title: 'Audio Effects',
+        description: 'Shape your sound with EQ, reverb, and mid-side processing. Save presets for instant recall.',
+        link: '/features/equalizer/'
+    },
+    {
+        title: 'Keyboard Shortcuts',
+        description: 'Control everything with 20+ configurable keyboard shortcuts. No mouse needed.',
+        link: '/features/keyboard-shortcuts/'
+    }
+]
+---
+
+<Landing title="Welcome to Chorus!" description="You've successfully installed Chorus. Here's how to get started.">
+    <section class="px-6 py-24 text-center">
+        <div class="mx-auto max-w-3xl">
+            <div class="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-[#1db954]/10">
+                <img src="/icon/48.png" alt="Chorus" width="48" height="48" />
+            </div>
+            <h1 class="mb-4 text-4xl font-bold md:text-5xl">
+                Welcome to <span class="text-[#1db954]">Chorus</span>!
+            </h1>
+            <p class="text-lg text-[#b3b3b3]">
+                You've successfully installed Chorus. Let's get you set up in under a minute.
+            </p>
+        </div>
+    </section>
+
+    <!-- Quick Start Steps -->
+    <section class="px-6 pb-20">
+        <div class="mx-auto max-w-3xl">
+            <h2 class="mb-10 text-center text-2xl font-bold">Quick Start</h2>
+            <div class="space-y-6">
+                {
+                    quickStartSteps.map((item) => (
+                        <div class="flex gap-5 rounded-xl border border-white/5 bg-[#181818] p-6">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1db954] text-lg font-bold text-black">
+                                {item.step}
+                            </div>
+                            <div>
+                                <h3 class="mb-1 text-lg font-semibold">{item.title}</h3>
+                                <p class="text-sm text-[#b3b3b3]">{item.description}</p>
+                            </div>
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Highlights -->
+    <section class="px-6 pb-20">
+        <div class="mx-auto max-w-3xl">
+            <h2 class="mb-10 text-center text-2xl font-bold">Features to Try First</h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {
+                    highlights.map((feature) => (
+                        <a
+                            href={feature.link}
+                            class="rounded-xl border border-white/5 bg-[#181818] p-5 transition hover:border-[#1db954]/30 hover:bg-[#1a1a1a]"
+                        >
+                            <h3 class="mb-2 font-semibold">{feature.title}</h3>
+                            <p class="text-sm text-[#b3b3b3]">{feature.description}</p>
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Tip -->
+    <section class="px-6 pb-20">
+        <div class="mx-auto max-w-3xl rounded-xl border border-[#1db954]/20 bg-[#1db954]/5 p-6 text-center">
+            <p class="font-medium">
+                <span class="text-[#1db954]">Tip:</span> Pin the Chorus extension icon to your browser toolbar for quick access to toggle it on/off.
+            </p>
+        </div>
+    </section>
+
+    <!-- Full Docs CTA -->
+    <section class="px-6 pb-24">
+        <div class="mx-auto max-w-3xl text-center">
+            <a
+                href="/getting-started/quick-start/"
+                class="inline-flex rounded-full bg-[#1db954] px-8 py-3.5 font-semibold text-black transition hover:bg-[#1aa34a]"
+            >
+                Read the Full Guide
+            </a>
+        </div>
+    </section>
+</Landing>

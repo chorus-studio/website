@@ -1,0 +1,152 @@
+---
+interface Props {
+    title: string
+    description?: string
+}
+
+const { title, description = 'Enhance Spotify with snips, auto-skip, speed control, EQ, reverb, and more.' } = Astro.props
+const currentYear = new Date().getFullYear()
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content={description} />
+        <meta name="generator" content={Astro.generator} />
+
+        <!-- Open Graph -->
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={Astro.url.href} />
+        <meta property="og:image" content={new URL('/icon/128.png', Astro.site).href} />
+
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+
+        <link rel="icon" type="image/png" href="/icon/32.png" sizes="32x32" />
+        <link rel="icon" type="image/png" href="/icon/16.png" sizes="16x16" />
+
+        <title>{title}</title>
+    </head>
+    <body class="min-h-screen bg-[#121212] text-white">
+        <nav class="fixed top-0 z-50 w-full border-b border-white/10 bg-[#121212]/90 backdrop-blur-md">
+            <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+                <a href="/" class="flex items-center gap-2">
+                    <img src="/icon/32.png" alt="Chorus" width="32" height="32" />
+                    <span class="text-lg font-bold">Chorus</span>
+                </a>
+                <div class="hidden items-center gap-6 text-sm text-[#b3b3b3] md:flex">
+                    <a href="/getting-started/installation/" class="transition hover:text-white">Docs</a>
+                    <a href="/blog/" class="transition hover:text-white">Blog</a>
+                    <a href="/changelog/" class="transition hover:text-white">Changelog</a>
+                    <a href="/downloads/" class="transition hover:text-white">Downloads</a>
+                    <a
+                        href="https://github.com/chorus-studio/chorus"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="transition hover:text-white"
+                    >
+                        GitHub
+                    </a>
+                </div>
+                <a
+                    href="https://chrome.google.com/webstore/detail/cdrani/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="rounded-full bg-[#1db954] px-4 py-2 text-sm font-semibold text-black transition hover:bg-[#1aa34a]"
+                >
+                    Install Extension
+                </a>
+            </div>
+        </nav>
+
+        <main class="pt-[73px]">
+            <slot />
+        </main>
+
+        <footer class="border-t border-white/10 bg-[#121212]">
+            <div class="mx-auto max-w-6xl px-6 py-12">
+                <div class="grid grid-cols-1 gap-8 md:grid-cols-4">
+                    <div>
+                        <div class="mb-3 flex items-center gap-2">
+                            <img src="/icon/32.png" alt="Chorus" width="24" height="24" />
+                            <span class="font-bold">Chorus</span>
+                        </div>
+                        <p class="text-sm text-[#b3b3b3]">
+                            Enhance your Spotify experience with powerful playback controls and audio
+                            effects.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="mb-3 text-sm font-semibold uppercase tracking-wider text-[#b3b3b3]">Product</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="/getting-started/installation/" class="text-[#b3b3b3] transition hover:text-white">Documentation</a></li>
+                            <li><a href="/downloads/" class="text-[#b3b3b3] transition hover:text-white">Downloads</a></li>
+                            <li><a href="/changelog/" class="text-[#b3b3b3] transition hover:text-white">Changelog</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="mb-3 text-sm font-semibold uppercase tracking-wider text-[#b3b3b3]">Resources</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="/blog/" class="text-[#b3b3b3] transition hover:text-white">Blog</a></li>
+                            <li><a href="/faq/" class="text-[#b3b3b3] transition hover:text-white">FAQ</a></li>
+                            <li>
+                                <a
+                                    href="https://github.com/chorus-studio/chorus"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="text-[#b3b3b3] transition hover:text-white"
+                                >
+                                    GitHub
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="mb-3 text-sm font-semibold uppercase tracking-wider text-[#b3b3b3]">Install</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li>
+                                <a
+                                    href="https://chrome.google.com/webstore/detail/cdrani/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="text-[#b3b3b3] transition hover:text-white"
+                                >
+                                    Chrome Web Store
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="https://addons.mozilla.org/firefox/addon/chorus-spotify-enhancer/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="text-[#b3b3b3] transition hover:text-white"
+                                >
+                                    Firefox Add-ons
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="https://github.com/chorus-studio/chorus/releases"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="text-[#b3b3b3] transition hover:text-white"
+                                >
+                                    GitHub Releases
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-10 border-t border-white/10 pt-6 text-center text-sm text-[#b3b3b3]">
+                    <p>&copy; {currentYear} Chorus. Open source under the MIT License.</p>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>

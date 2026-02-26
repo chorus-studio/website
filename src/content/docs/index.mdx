@@ -1,0 +1,36 @@
+---
+title: Chorus Documentation
+description: Learn how to use Chorus to enhance your Spotify experience.
+template: splash
+hero:
+  tagline: Enhance Spotify with snips, auto-skip, speed control, EQ, reverb, and more.
+  image:
+    file: ../../assets/houston.webp
+  actions:
+    - text: Get Started
+      link: /getting-started/installation/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/chorus-studio/chorus
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Features
+
+<CardGrid stagger>
+  <Card title="Snips" icon="seti:audio">
+    Save your favorite sections of any track and loop them forever. Share with friends via a link.
+  </Card>
+  <Card title="Auto-Skip & Block" icon="close">
+    Block tracks you never want to hear again. Works across albums, playlists, and more.
+  </Card>
+  <Card title="Speed Control" icon="rocket">
+    Set global or per-track playback speed with optional pitch correction.
+  </Card>
+  <Card title="Audio Effects" icon="setting">
+    EQ, reverb, and mid-side processing with saveable presets.
+  </Card>
+</CardGrid>

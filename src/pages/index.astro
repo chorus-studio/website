@@ -1,0 +1,188 @@
+---
+import Landing from '../layouts/Landing.astro'
+
+const features = [
+    {
+        title: 'Snips',
+        description:
+            'Save your favorite section of any track — chorus, verse, bridge — and loop it forever. Share snips with friends via a link.',
+        icon: 'scissors'
+    },
+    {
+        title: 'Auto-Skip & Block',
+        description:
+            'Block tracks you never want to hear again. Works across albums, playlists, artist pages, search, and queue.',
+        icon: 'ban'
+    },
+    {
+        title: 'Playback Speed',
+        description:
+            'Set global or per-track playback speed. Toggle pitch correction to switch between low and high pitch vocals.',
+        icon: 'gauge'
+    },
+    {
+        title: 'Equalizer',
+        description:
+            'Fine-tune your sound with built-in Spotify presets or create your own custom EQ profiles.',
+        icon: 'sliders-horizontal'
+    },
+    {
+        title: 'Reverb',
+        description:
+            'Add room reverb effects with impulse responses. Choose from presets or dial in your own settings.',
+        icon: 'waves'
+    },
+    {
+        title: 'Mid-Side Processor',
+        description:
+            'Advanced stereo effects with multi-effect support. Shape the stereo image of any track in real time.',
+        icon: 'audio-lines'
+    },
+    {
+        title: 'Seeking Controls',
+        description:
+            'Fast-forward and rewind with customizable seek durations. Works with music, podcasts, and audiobooks.',
+        icon: 'fast-forward'
+    },
+    {
+        title: 'Keyboard Shortcuts',
+        description:
+            '20+ configurable keyboard commands for media control, snip management, presets, and theme switching.',
+        icon: 'keyboard'
+    },
+    {
+        title: 'Theming',
+        description:
+            'Multiple themes with vibrant color extraction from album artwork. Dynamic colors that follow your music.',
+        icon: 'palette'
+    }
+]
+
+const iconPaths: Record<string, string> = {
+    scissors:
+        'M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6m0 0l5.12 5.12M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6m0 0l5.12-5.12m3.76 3.76L18 18m-1.12-7.12L18 6',
+    ban: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10m-5.66-4.34L16.66 7.34',
+    gauge: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6m0 0V3m-9 9a9 9 0 1 0 18 0 9 9 0 0 0-18 0',
+    'sliders-horizontal':
+        'M21 4h-7m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H3m18 8h-3m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H3m18 8h-7m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H3',
+    waves: 'M2 12c.6-.5 1.2-1 2.5-1s2.5 1.5 4 1.5 2.5-1.5 4-1.5 2.5 1.5 4 1.5 2.5-1 3.5-1.5m-18-4c.6-.5 1.2-1 2.5-1s2.5 1.5 4 1.5 2.5-1.5 4-1.5 2.5 1.5 4 1.5 2.5-1 3.5-1.5m-18 8c.6-.5 1.2-1 2.5-1s2.5 1.5 4 1.5 2.5-1.5 4-1.5 2.5 1.5 4 1.5 2.5-1 3.5-1.5',
+    'audio-lines':
+        'M2 10v4m4-8v12m4-16v20m4-16v12m4-8v4',
+    'fast-forward': 'M13 19V5l7 7-7 7M4 19V5l7 7-7 7',
+    keyboard:
+        'M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6m4 2h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8',
+    palette:
+        'M12 2a10 10 0 0 0 0 20c.73 0 1.4-.47 1.63-1.17a1.74 1.74 0 0 0-1.31-2.33H11a3 3 0 0 1 0-6h1.5a1.5 1.5 0 0 0 0-3H11a5 5 0 0 1 0-10h1'
+}
+---
+
+<Landing title="Chorus - Spotify Enhancer">
+    <!-- Hero -->
+    <section class="relative overflow-hidden px-6 py-24 text-center md:py-36">
+        <div class="absolute inset-0 bg-gradient-to-b from-[#1db954]/10 via-transparent to-transparent"></div>
+        <div class="relative mx-auto max-w-4xl">
+            <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-[#1db954]/30 bg-[#1db954]/10 px-4 py-1.5 text-sm text-[#1db954]">
+                <span>v2.8.3</span>
+                <span class="text-[#1db954]/50">|</span>
+                <span>Open Source</span>
+            </div>
+            <h1 class="mb-6 text-5xl font-bold leading-tight tracking-tight md:text-7xl">
+                Enhance Your<br />
+                <span class="text-[#1db954]">Spotify</span> Experience
+            </h1>
+            <p class="mx-auto mb-10 max-w-2xl text-lg text-[#b3b3b3] md:text-xl">
+                Save favorite track sections, auto-skip songs, control playback speed, and add
+                professional audio effects — all from your browser.
+            </p>
+            <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <a
+                    href="https://chrome.google.com/webstore/detail/cdrani/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 rounded-full bg-[#1db954] px-8 py-3.5 font-semibold text-black transition hover:bg-[#1aa34a]"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+                    Install for Chrome
+                </a>
+                <a
+                    href="https://addons.mozilla.org/firefox/addon/chorus-spotify-enhancer/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 rounded-full border border-white/20 px-8 py-3.5 font-semibold transition hover:bg-white/10"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                    Install for Firefox
+                </a>
+            </div>
+            <p class="mt-6 text-sm text-[#b3b3b3]">
+                Also works on Edge, Opera, Brave, and Vivaldi
+            </p>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="px-6 py-20">
+        <div class="mx-auto max-w-6xl">
+            <div class="mb-16 text-center">
+                <h2 class="mb-4 text-3xl font-bold md:text-4xl">Everything Spotify is Missing</h2>
+                <p class="mx-auto max-w-2xl text-[#b3b3b3]">
+                    Professional-grade audio controls and track management features that transform
+                    the Spotify web player.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {
+                    features.map((feature) => (
+                        <div class="group rounded-xl border border-white/5 bg-[#181818] p-6 transition hover:border-[#1db954]/30 hover:bg-[#1a1a1a]">
+                            <div class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[#1db954]/10">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="#1db954"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d={iconPaths[feature.icon]} />
+                                </svg>
+                            </div>
+                            <h3 class="mb-2 text-lg font-semibold">{feature.title}</h3>
+                            <p class="text-sm leading-relaxed text-[#b3b3b3]">
+                                {feature.description}
+                            </p>
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="px-6 py-20">
+        <div class="mx-auto max-w-3xl rounded-2xl border border-white/5 bg-gradient-to-br from-[#1db954]/10 to-transparent p-12 text-center">
+            <h2 class="mb-4 text-3xl font-bold">Ready to enhance Spotify?</h2>
+            <p class="mb-8 text-[#b3b3b3]">
+                Free, open source, and available for all Chromium browsers and Firefox.
+            </p>
+            <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <a
+                    href="https://chrome.google.com/webstore/detail/cdrani/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="rounded-full bg-[#1db954] px-8 py-3 font-semibold text-black transition hover:bg-[#1aa34a]"
+                >
+                    Get Chorus Free
+                </a>
+                <a
+                    href="/getting-started/installation/"
+                    class="rounded-full border border-white/20 px-8 py-3 font-semibold transition hover:bg-white/10"
+                >
+                    Read the Docs
+                </a>
+            </div>
+        </div>
+    </section>
+</Landing>

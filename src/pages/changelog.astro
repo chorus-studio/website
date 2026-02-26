@@ -1,0 +1,118 @@
+---
+import Landing from '../layouts/Landing.astro'
+
+interface Release {
+    tag_name: string
+    name: string
+    body: string
+    published_at: string
+    html_url: string
+    prerelease: boolean
+}
+
+let releases: Release[] = []
+
+try {
+    const response = await fetch(
+        'https://api.github.com/repos/chorus-studio/chorus/releases?per_page=50',
+        {
+            headers: {
+                Accept: 'application/vnd.github.v3+json',
+                'User-Agent': 'chorusstudio-website'
+            }
+        }
+    )
+    if (response.ok) {
+        releases = await response.json()
+    }
+} catch {
+    // Fallback: empty releases will show a message
+}
+
+function formatDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    })
+}
+
+function parseMarkdown(text: string): string {
+    return text
+        .replace(/### (.+)/g, '<h4 class="mt-4 mb-2 font-semibold text-white">$1</h4>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/- (.+)/g, '<li class="ml-4 text-sm text-[#b3b3b3]">$1</li>')
+        .replace(
+            /\[([^\]]+)\]\(([^)]+)\)/g,
+            '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-[#1db954] hover:underline">$1</a>'
+        )
+        .replace(/\n\n/g, '<br/>')
+}
+---
+
+<Landing title="Changelog | Chorus" description="Release history and version notes for the Chorus browser extension.">
+    <section class="px-6 py-24">
+        <div class="mx-auto max-w-3xl">
+            <div class="mb-16 text-center">
+                <h1 class="mb-4 text-4xl font-bold">Changelog</h1>
+                <p class="text-[#b3b3b3]">
+                    A history of every release, feature, and fix.
+                </p>
+            </div>
+
+            {
+                releases.length > 0 ? (
+                    <div class="space-y-8">
+                        {releases.map((release, i) => (
+                            <article class="rounded-xl border border-white/5 bg-[#181818] p-6">
+                                <div class="mb-4 flex flex-wrap items-center gap-3">
+                                    <a
+                                        href={release.html_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="text-xl font-bold transition hover:text-[#1db954]"
+                                    >
+                                        {release.tag_name}
+                                    </a>
+                                    {i === 0 && (
+                                        <span class="rounded-full bg-[#1db954]/10 px-3 py-0.5 text-xs font-medium text-[#1db954]">
+                                            Latest
+                                        </span>
+                                    )}
+                                    {release.prerelease && (
+                                        <span class="rounded-full bg-yellow-500/10 px-3 py-0.5 text-xs font-medium text-yellow-400">
+                                            Pre-release
+                                        </span>
+                                    )}
+                                    <span class="text-sm text-[#b3b3b3]">
+                                        {formatDate(release.published_at)}
+                                    </span>
+                                </div>
+                                {release.body && (
+                                    <div
+                                        class="prose-invert text-sm leading-relaxed"
+                                        set:html={parseMarkdown(release.body)}
+                                    />
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                ) : (
+                    <div class="rounded-xl border border-white/5 bg-[#181818] p-12 text-center">
+                        <p class="mb-4 text-[#b3b3b3]">
+                            Unable to load releases. Check GitHub directly.
+                        </p>
+                        <a
+                            href="https://github.com/chorus-studio/chorus/releases"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-[#1db954] hover:underline"
+                        >
+                            View releases on GitHub
+                        </a>
+                    </div>
+                )
+            }
+        </div>
+    </section>
+</Landing>

@@ -1,0 +1,137 @@
+---
+import Landing from '../layouts/Landing.astro'
+
+const reasons = [
+    "It didn't work as expected",
+    'Too many features / too complex',
+    'It slowed down Spotify',
+    "I don't use Spotify web player anymore",
+    'I found a better alternative',
+    'Privacy concerns',
+    'Other'
+]
+---
+
+<Landing title="Sorry to see you go | Chorus" description="Help us improve Chorus by sharing your feedback.">
+    <section class="px-6 py-24 text-center">
+        <div class="mx-auto max-w-2xl">
+            <div class="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-white/5">
+                <img src="/icon/48.png" alt="Chorus" width="48" height="48" class="opacity-50" />
+            </div>
+            <h1 class="mb-4 text-3xl font-bold md:text-4xl">Sorry to see you go</h1>
+            <p class="text-[#b3b3b3]">
+                Chorus has been uninstalled. We'd love to know why so we can make it better.
+            </p>
+        </div>
+    </section>
+
+    <!-- Feedback Form -->
+    <section class="px-6 pb-20">
+        <div class="mx-auto max-w-lg">
+            <form id="uninstall-form" class="space-y-6 rounded-xl border border-white/5 bg-[#181818] p-8">
+                <div>
+                    <p class="mb-4 font-medium">Why did you uninstall Chorus?</p>
+                    <div class="space-y-3">
+                        {
+                            reasons.map((reason) => (
+                                <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-white/5 px-4 py-3 transition hover:border-white/20">
+                                    <input
+                                        type="radio"
+                                        name="reason"
+                                        value={reason}
+                                        class="accent-[#1db954]"
+                                    />
+                                    <span class="text-sm">{reason}</span>
+                                </label>
+                            ))
+                        }
+                    </div>
+                </div>
+                <div>
+                    <label for="details" class="mb-2 block text-sm font-medium">
+                        Anything else you'd like to share? (optional)
+                    </label>
+                    <textarea
+                        id="details"
+                        name="details"
+                        rows="3"
+                        placeholder="Tell us more..."
+                        class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-[#b3b3b3] outline-none focus:border-[#1db954]/50"
+                    ></textarea>
+                </div>
+                <button
+                    type="submit"
+                    class="w-full rounded-full bg-[#1db954] py-3 font-semibold text-black transition hover:bg-[#1aa34a]"
+                >
+                    Submit Feedback
+                </button>
+                <div id="form-message" class="hidden text-center text-sm"></div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Reinstall CTA -->
+    <section class="px-6 pb-24">
+        <div class="mx-auto max-w-lg text-center">
+            <p class="mb-4 text-[#b3b3b3]">Changed your mind?</p>
+            <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <a
+                    href="https://chrome.google.com/webstore/detail/cdrani/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="rounded-full border border-white/20 px-6 py-2.5 text-sm font-semibold transition hover:bg-white/10"
+                >
+                    Reinstall for Chrome
+                </a>
+                <a
+                    href="https://addons.mozilla.org/firefox/addon/chorus-spotify-enhancer/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="rounded-full border border-white/20 px-6 py-2.5 text-sm font-semibold transition hover:bg-white/10"
+                >
+                    Reinstall for Firefox
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const form = document.getElementById('uninstall-form') as HTMLFormElement
+        const message = document.getElementById('form-message') as HTMLDivElement
+
+        form?.addEventListener('submit', async (e) => {
+            e.preventDefault()
+            const data = new FormData(form)
+            const reason = data.get('reason') as string
+            const details = data.get('details') as string
+
+            if (!reason) {
+                message.textContent = 'Please select a reason.'
+                message.className = 'text-center text-sm text-red-400'
+                return
+            }
+
+            try {
+                // POST to Cloudflare Worker endpoint for email delivery
+                const response = await fetch('/api/uninstall-feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason, details })
+                })
+
+                if (response.ok) {
+                    message.textContent = 'Thank you for your feedback!'
+                    message.className = 'text-center text-sm text-[#1db954]'
+                    form.querySelector('button[type="submit"]')?.setAttribute('disabled', 'true')
+                } else {
+                    message.textContent = 'Thank you for your feedback!'
+                    message.className = 'text-center text-sm text-[#1db954]'
+                }
+            } catch {
+                // Graceful degradation — still thank the user
+                message.textContent = 'Thank you for your feedback!'
+                message.className = 'text-center text-sm text-[#1db954]'
+            }
+        })
+    </script>
+</Landing>
