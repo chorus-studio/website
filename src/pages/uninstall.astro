@@ -3,21 +3,15 @@ import Landing from '../layouts/Landing.astro'
 
 const reasons = [
     "It didn't work as expected",
-    'Too many features / too complex',
-    'It slowed down Spotify',
     "I don't use Spotify web player anymore",
     'I found a better alternative',
-    'Privacy concerns',
     'Other'
 ]
 ---
 
 <Landing title="Sorry to see you go | Chorus" description="Help us improve Chorus by sharing your feedback.">
-    <section class="px-6 py-24 text-center">
+    <section class="px-6 py-10 text-center">
         <div class="mx-auto max-w-2xl">
-            <div class="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-white/5">
-                <img src="/icon/48.png" alt="Chorus" width="48" height="48" class="opacity-50" />
-            </div>
             <h1 class="mb-4 text-3xl font-bold md:text-4xl">Sorry to see you go</h1>
             <p class="text-[#b3b3b3]">
                 Chorus has been uninstalled. We'd love to know why so we can make it better.
@@ -26,8 +20,8 @@ const reasons = [
     </section>
 
     <!-- Feedback Form -->
-    <section class="px-6 pb-20">
-        <div class="mx-auto max-w-lg">
+    <section class="px-6 pb-10">
+        <div class="mx-auto max-w-xl">
             <form id="uninstall-form" class="space-y-6 rounded-xl border border-white/5 bg-[#181818] p-8">
                 <div>
                     <p class="mb-4 font-medium">Why did you uninstall Chorus?</p>
@@ -54,7 +48,7 @@ const reasons = [
                     <textarea
                         id="details"
                         name="details"
-                        rows="3"
+                        rows="5"
                         placeholder="Tell us more..."
                         class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-[#b3b3b3] outline-none focus:border-[#1db954]/50"
                     ></textarea>
@@ -76,7 +70,7 @@ const reasons = [
             <p class="mb-4 text-[#b3b3b3]">Changed your mind?</p>
             <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <a
-                    href="https://chrome.google.com/webstore/detail/cdrani/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
+                    href="https://chromewebstore.google.com/detail/chorus-spotify-enhancer/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="rounded-full border border-white/20 px-6 py-2.5 text-sm font-semibold transition hover:bg-white/10"

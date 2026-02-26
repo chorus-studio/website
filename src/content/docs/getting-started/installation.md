@@ -9,7 +9,7 @@ Chorus is available for all major browsers. Choose your preferred installation m
 
 Install directly from the Chrome Web Store. This also works for **Edge**, **Opera**, **Brave**, **Vivaldi**, and other Chromium-based browsers.
 
-[Install from Chrome Web Store](https://chrome.google.com/webstore/detail/cdrani/jfnjmnapkhdbaidedlbdcmhiphfjljcd)
+[Install from Chrome Web Store](https://chromewebstore.google.com/detail/chorus-spotify-enhancer/jfnjmnapkhdbaidedlbdcmhiphfjljcd)
 
 ## Firefox Add-ons
 

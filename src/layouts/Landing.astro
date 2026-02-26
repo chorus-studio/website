@@ -6,6 +6,8 @@ interface Props {
 
 const { title, description = 'Enhance Spotify with snips, auto-skip, speed control, EQ, reverb, and more.' } = Astro.props
 const currentYear = new Date().getFullYear()
+
+import '../styles/global.css'
 ---
 
 <!doctype html>
@@ -55,7 +57,7 @@ const currentYear = new Date().getFullYear()
                     </a>
                 </div>
                 <a
-                    href="https://chrome.google.com/webstore/detail/cdrani/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
+                    href="https://chromewebstore.google.com/detail/chorus-spotify-enhancer/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="rounded-full bg-[#1db954] px-4 py-2 text-sm font-semibold text-black transition hover:bg-[#1aa34a]"
@@ -112,7 +114,7 @@ const currentYear = new Date().getFullYear()
                         <ul class="space-y-2 text-sm">
                             <li>
                                 <a
-                                    href="https://chrome.google.com/webstore/detail/cdrani/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
+                                    href="https://chromewebstore.google.com/detail/chorus-spotify-enhancer/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="text-[#b3b3b3] transition hover:text-white"
