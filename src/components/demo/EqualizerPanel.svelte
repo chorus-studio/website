@@ -1,11 +1,8 @@
 <script lang="ts">
+    import { RotateCcw } from '@lucide/svelte'
     import type Equalizer from '../../lib/audio-effects/equalizer'
-    import {
-        EQ_FILTERS,
-        EQ_PRESETS,
-        spotifyPresets,
-        customPresets
-    } from '../../lib/audio-effects/equalizer/presets'
+    import { spotifyPresets, customPresets } from '../../lib/audio-effects/equalizer/presets'
+    import CustomSelect from './ui/CustomSelect.svelte'
 
     let {
         equalizer,
@@ -15,109 +12,67 @@
         isReady: boolean
     } = $props()
 
-    let activePreset = $state('Flat')
-    let gains = $state<number[]>(new Array(EQ_FILTERS.length).fill(0))
+    let activePreset = $state('none')
 
-    function formatFreq(freq: number): string {
-        if (freq >= 1000) return `${freq / 1000}k`
-        return `${freq}`
-    }
+    const spotifyOptions = [
+        { label: 'none', value: 'none' },
+        ...spotifyPresets.map((p) => ({ label: p, value: p }))
+    ]
+    const customOptions = [
+        { label: 'none', value: 'none' },
+        ...customPresets.map((p) => ({ label: p, value: p }))
+    ]
 
-    function selectPreset(name: string) {
-        activePreset = name
-        const presetGains = EQ_PRESETS[name]
-        if (presetGains) {
-            // Preset gains are 10-band, pad to 19 bands
-            gains = EQ_FILTERS.map((_, i) => {
-                if (i < 3) return presetGains[0] ?? 0 // lowshelf bands share first value
-                if (i >= 17) return presetGains[9] ?? 0 // highshelf bands share last value
-                // Map the 10 preset values to the middle 14 bands
-                const presetIndex = Math.min(Math.floor((i - 3) * 10 / 14), 9)
-                return presetGains[presetIndex] ?? 0
-            })
-        }
+    let topSelected = $derived(spotifyPresets.includes(activePreset))
+
+    function handleUpdateEffect(value: string) {
+        activePreset = value
         if (equalizer && isReady) {
-            equalizer.setEQEffect(name)
+            equalizer.setEQEffect(value)
         }
     }
 
     function reset() {
-        selectPreset('Flat')
+        handleUpdateEffect('none')
     }
 </script>
 
-<div class="space-y-4">
-    <!-- Preset buttons -->
-    <div class="space-y-3">
-        <div class="flex items-center justify-between">
-            <span class="text-xs font-medium uppercase tracking-wider text-[#b3b3b3]"
-                >Spotify Presets</span
-            >
-            <button
-                onclick={reset}
-                class="rounded px-2 py-1 text-xs text-[#b3b3b3] transition hover:text-white"
-            >
-                Reset
-            </button>
+<div class="flex w-full flex-col gap-y-2.5">
+    <h2 class="text-base leading-none text-gray-400">equalizer</h2>
+
+    <div class="flex w-full flex-col gap-y-1.5">
+        <div class="flex flex-col">
+            <label class="w-full text-sm text-gray-400">spotify eq presets</label>
+            <CustomSelect
+                size="md"
+                selected={topSelected ? activePreset : 'none'}
+                options={spotifyOptions}
+                onValueChange={handleUpdateEffect}
+            />
         </div>
-        <div class="flex flex-wrap gap-1.5">
-            {#each spotifyPresets as name}
-                <button
-                    onclick={() => selectPreset(name)}
-                    class="rounded-full px-3 py-1 text-xs transition
-                        {activePreset === name
-                        ? 'bg-[#1db954] text-black'
-                        : 'border border-white/10 text-[#b3b3b3] hover:border-white/20 hover:text-white'}"
-                >
-                    {name}
-                </button>
-            {/each}
+
+        <div class="flex flex-col">
+            <label class="w-full text-sm text-gray-400">custom eq presets</label>
+            <CustomSelect
+                size="md"
+                selected={!topSelected ? activePreset : 'none'}
+                options={customOptions}
+                onValueChange={handleUpdateEffect}
+            />
         </div>
     </div>
 
-    <div class="space-y-2">
-        <span class="text-xs font-medium uppercase tracking-wider text-[#b3b3b3]"
-            >Custom Presets</span
+    <div class="mt-1 h-0.5 w-full bg-zinc-700"></div>
+
+    <div class="flex w-full justify-between">
+        <button
+            class="flex h-6 w-7 items-center justify-center rounded-none text-zinc-400 hover:text-white"
+            onclick={reset}
         >
-        <div class="flex flex-wrap gap-1.5">
-            {#each customPresets as name}
-                <button
-                    onclick={() => selectPreset(name)}
-                    class="rounded-full px-3 py-1 text-xs transition
-                        {activePreset === name
-                        ? 'bg-[#1db954] text-black'
-                        : 'border border-white/10 text-[#b3b3b3] hover:border-white/20 hover:text-white'}"
-                >
-                    {name}
-                </button>
-            {/each}
-        </div>
+            <RotateCcw size={16} />
+        </button>
+        <p class="inline-flex w-full justify-end text-sm text-white">
+            {activePreset}
+        </p>
     </div>
-
-    <!-- EQ Bands visualization -->
-    <div class="rounded-lg border border-white/5 bg-white/5 p-4">
-        <div class="flex items-end justify-between gap-1">
-            {#each EQ_FILTERS as filter, i}
-                <div class="flex flex-col items-center gap-1">
-                    <div class="relative h-24 w-3">
-                        <!-- Background track -->
-                        <div class="absolute inset-0 rounded-full bg-white/10"></div>
-                        <!-- Fill bar -->
-                        <div
-                            class="absolute bottom-1/2 w-full rounded-full bg-[#1db954] transition-all duration-150"
-                            style="height: {Math.abs(gains[i] ?? 0) * (50 / 12)}%;
-                                   {(gains[i] ?? 0) >= 0 ? 'bottom: 50%' : 'top: 50%'}"
-                        ></div>
-                        <!-- Center line -->
-                        <div class="absolute top-1/2 w-full border-t border-white/30"></div>
-                    </div>
-                    <span class="text-[8px] text-[#b3b3b3]">{formatFreq(filter.freq)}</span>
-                </div>
-            {/each}
-        </div>
-    </div>
-
-    <p class="text-center text-xs text-[#b3b3b3]">
-        Active: <span class="text-[#1db954]">{activePreset}</span> — 19 bands, Q=1
-    </p>
 </div>

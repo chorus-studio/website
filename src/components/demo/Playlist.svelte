@@ -21,9 +21,9 @@
     } = $props()
 </script>
 
-<div class="border-b border-white/5 p-4">
+<div class="border-b border-white/5 p-5 w-full">
     <div class="mb-2 flex items-center justify-between">
-        <span class="text-xs font-medium uppercase tracking-wider text-[#b3b3b3]">Playlist</span>
+        <span class="text-xs font-medium uppercase tracking-wider text-[#b3b3b3]">Track List</span>
         <span class="text-xs text-[#b3b3b3]">
             {tracks.filter((t) => !t.blocked).length}/{tracks.length} active
         </span>

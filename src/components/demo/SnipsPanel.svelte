@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Repeat, Play, Pause } from '@lucide/svelte'
+    import CustomSlider from './ui/CustomSlider.svelte'
 
     let {
         audioEl
@@ -9,66 +9,69 @@
 
     let startTime = $state(0)
     let endTime = $state(0)
-    let loopEnabled = $state(false)
     let duration = $state(0)
-    let currentTime = $state(0)
     let isPlaying = $state(false)
-    let dragging = $state<'start' | 'end' | null>(null)
+    let loopEnabled = $state(true)
 
-    let hasSnip = $derived(startTime > 0 || endTime < duration)
-    let snipDuration = $derived(endTime - startTime)
-    let startPercent = $derived(duration > 0 ? (startTime / duration) * 100 : 0)
-    let endPercent = $derived(duration > 0 ? (endTime / duration) * 100 : 100)
-    let currentPercent = $derived(duration > 0 ? (currentTime / duration) * 100 : 0)
-
-    function formatTime(seconds: number): string {
-        const m = Math.floor(seconds / 60)
-        const s = Math.floor(seconds % 60)
-        const ms = Math.floor((seconds % 1) * 100)
-        return `${m}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`
+    function secondsToTime(totalSeconds: number): string {
+        const m = Math.floor((totalSeconds % 3600) / 60)
+        const s = Math.floor(totalSeconds % 60)
+        return `${m.toString().padStart(1, '0')}:${s.toString().padStart(2, '0')}`
     }
 
-    function handlePointerDown(handle: 'start' | 'end', e: PointerEvent) {
-        dragging = handle
-        ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+    function timeToSeconds(timeStr: string): number | null {
+        const parts = timeStr.split(':').map(Number)
+        if (parts.length !== 4 || parts.some(isNaN)) return null
+        const [h, m, s, ms] = parts
+        return h * 3600 + m * 60 + s + ms / 100
     }
 
-    function handlePointerMove(e: PointerEvent) {
-        if (!dragging || !duration) return
-        const track = (e.currentTarget as HTMLElement)
-        const rect = track.getBoundingClientRect()
-        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
-        const time = ratio * duration
-
-        if (dragging === 'start') {
-            startTime = Math.min(time, endTime - 0.1)
-        } else {
-            endTime = Math.max(time, startTime + 0.1)
+    function handleSliderChange(value: number | number[]) {
+        const [start, end] = value as number[]
+        startTime = start
+        endTime = end
+        if (audioEl) {
+            audioEl.currentTime = start
         }
     }
 
-    function handlePointerUp() {
-        dragging = null
+    function handleStartChange(event: Event) {
+        const input = event.target as HTMLInputElement
+        const seconds = timeToSeconds(input.value)
+        if (seconds !== null && seconds >= 0 && seconds < endTime) {
+            startTime = seconds
+            if (audioEl) audioEl.currentTime = seconds
+        }
     }
 
-    function playSnip() {
+    function handleEndChange(event: Event) {
+        const input = event.target as HTMLInputElement
+        const seconds = timeToSeconds(input.value)
+        if (seconds !== null && seconds > startTime && seconds <= duration) {
+            endTime = seconds
+        }
+    }
+
+    function restart() {
+        if (audioEl) {
+            audioEl.currentTime = startTime
+        }
+    }
+
+    function togglePlayPause() {
         if (!audioEl) return
-        audioEl.currentTime = startTime
-        audioEl.play()
-    }
-
-    function resetSnip() {
-        startTime = 0
-        endTime = duration || 0
-        loopEnabled = false
+        if (audioEl.paused) {
+            audioEl.play()
+        } else {
+            audioEl.pause()
+        }
     }
 
     $effect(() => {
         if (!audioEl) return
 
         const onTimeUpdate = () => {
-            currentTime = audioEl!.currentTime
-            if (loopEnabled && currentTime >= endTime) {
+            if (loopEnabled && audioEl!.currentTime >= endTime) {
                 audioEl!.currentTime = startTime
             }
         }
@@ -101,93 +104,103 @@
     })
 </script>
 
-<div class="space-y-4">
-    <div class="flex items-center justify-between">
-        <span class="text-xs font-medium uppercase tracking-wider text-[#b3b3b3]">Snip Editor</span>
-        <button
-            onclick={resetSnip}
-            class="rounded px-2 py-1 text-xs text-[#b3b3b3] transition hover:text-white"
-        >
-            Reset
-        </button>
+<div class="flex h-full w-full flex-col gap-x-1 space-y-6 space-between">
+    <!-- TimeSlider -->
+    <div class="flex w-full items-center justify-between gap-4">
+        <p class="w-full max-w-6 text-xs text-zinc-400">
+            {secondsToTime(startTime)}
+        </p>
+        <CustomSlider
+            onValueChange={handleSliderChange}
+            type="multiple"
+            value={[startTime, endTime]}
+            min={0}
+            max={duration || 1}
+            step={1}
+        />
+        <p class="w-full max-w-6 text-xs text-zinc-400">
+            {secondsToTime(endTime)}
+        </p>
     </div>
 
-    <!-- Timeline with snip markers -->
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div
-        class="relative h-12 select-none rounded-lg border border-white/5 bg-white/5"
-        onpointermove={handlePointerMove}
-        onpointerup={handlePointerUp}
-    >
-        <!-- Snip region highlight -->
-        <div
-            class="absolute top-0 h-full rounded bg-[#1db954]/20"
-            style="left: {startPercent}%; width: {endPercent - startPercent}%"
-        ></div>
-
-        <!-- Current position -->
-        <div
-            class="absolute top-0 h-full w-0.5 bg-white"
-            style="left: {currentPercent}%"
-        ></div>
-
-        <!-- Start handle -->
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div
-            class="absolute top-0 h-full w-4 cursor-ew-resize"
-            style="left: calc({startPercent}% - 8px)"
-            onpointerdown={(e) => handlePointerDown('start', e)}
-        >
-            <div class="absolute left-1/2 top-0 h-full w-1 -translate-x-1/2 rounded-full bg-[#1db954]"></div>
-            <div class="absolute left-1/2 top-1/2 h-4 w-3 -translate-x-1/2 -translate-y-1/2 rounded border border-[#1db954] bg-[#1db954]/30"></div>
-        </div>
-
-        <!-- End handle -->
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div
-            class="absolute top-0 h-full w-4 cursor-ew-resize"
-            style="left: calc({endPercent}% - 8px)"
-            onpointerdown={(e) => handlePointerDown('end', e)}
-        >
-            <div class="absolute left-1/2 top-0 h-full w-1 -translate-x-1/2 rounded-full bg-[#1db954]"></div>
-            <div class="absolute left-1/2 top-1/2 h-4 w-3 -translate-x-1/2 -translate-y-1/2 rounded border border-[#1db954] bg-[#1db954]/30"></div>
-        </div>
-    </div>
-
-    <!-- Time display -->
-    <div class="flex justify-between text-xs text-[#b3b3b3]">
-        <span>Start: <span class="text-white">{formatTime(startTime)}</span></span>
-        <span>Duration: <span class="text-[#1db954]">{formatTime(snipDuration)}</span></span>
-        <span>End: <span class="text-white">{formatTime(endTime)}</span></span>
-    </div>
-
-    <!-- Controls -->
-    <div class="flex items-center justify-center gap-3">
-        <button
-            onclick={playSnip}
-            class="inline-flex items-center gap-1.5 rounded-full bg-[#1db954] px-4 py-2 text-xs font-medium text-black transition hover:bg-[#1aa34a]"
-        >
-            {#if isPlaying}
-                <Pause size={14} />
-            {:else}
-                <Play size={14} />
-            {/if}
-            Play Snip
-        </button>
-
-        <button
-            onclick={() => (loopEnabled = !loopEnabled)}
-            class="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium transition
-                {loopEnabled
-                ? 'bg-[#1db954] text-black'
-                : 'border border-white/10 text-[#b3b3b3] hover:border-white/20 hover:text-white'}"
-        >
-            <Repeat size={14} />
-            Loop {loopEnabled ? 'On' : 'Off'}
-        </button>
-    </div>
-
-    <p class="text-center text-xs text-[#b3b3b3]">
-        Drag the green handles to set a snip region. In Chorus, snips are saved per track and can be shared via link.
+    <!-- SnipInputs -->
+    <p class="-mt-3 flex w-full text-xs text-zinc-400">
+        * while editing "end", track plays 3 secs past set end
     </p>
+
+    <div class="-mt-2 grid w-full grid-cols-2">
+        <!-- Start/End inputs -->
+        <div class="flex flex-col items-center gap-y-1">
+            <div class="flex h-6 w-full items-center">
+                <label
+                    for="startTime"
+                    class="flex h-6 w-12 min-w-12 items-center justify-center border-none bg-zinc-700 px-2 py-0 pb-[0.075rem] text-center text-base font-bold lowercase leading-5 text-zinc-200"
+                >Start</label>
+                <input
+                    id="startTime"
+                    value={secondsToTime(startTime)}
+                    onchange={handleStartChange}
+                    class="h-6 w-24 rounded-none border-none bg-green-700 pr-2 text-end text-base font-bold tracking-wide text-white outline-none"
+                />
+            </div>
+            <div class="flex w-full items-center">
+                <label
+                    for="endTime"
+                    class="flex h-6 w-12 min-w-12 items-center justify-center border-none bg-zinc-700 px-2 py-0 pb-[0.075rem] text-center text-base font-bold lowercase leading-5 text-zinc-200"
+                >End</label>
+                <input
+                    id="endTime"
+                    value={secondsToTime(endTime)}
+                    onchange={handleEndChange}
+                    class="h-6 w-24 rounded-none border-none bg-green-700 pr-2 text-end text-base font-bold lowercase tracking-wide text-white outline-none"
+                />
+            </div>
+        </div>
+
+        <!-- Snip length + controls -->
+        <div class="flex w-full flex-col items-center gap-1">
+            <p class="text-sm text-zinc-400">
+                snip length: {secondsToTime(endTime - startTime)}
+            </p>
+            <div class="flex items-center justify-between gap-x-2">
+                <button
+                    class="flex h-6 w-6 items-center justify-center rounded-full border-none bg-transparent stroke-current hover:bg-transparent"
+                    onclick={restart}
+                    title="Restart snip"
+                >
+                    <svg
+                        class="h-5 w-5 fill-none stroke-current stroke-5"
+                        viewBox="0 0 64 64"
+                        xmlns="http://www.w3.org/2000/svg"
+                        preserveAspectRatio="xMidYMid meet"
+                    >
+                        <path d="M34.46,53.91A21.91,21.91,0,1,0,12.55,31.78"></path>
+                        <polyline points="4.65 22.33 12.52 32.62 22.81 24.75"></polyline>
+                    </svg>
+                </button>
+                <button
+                    class="flex h-7 w-7 items-center justify-center rounded-full bg-transparent stroke-current hover:bg-transparent"
+                    onclick={togglePlayPause}
+                    title={isPlaying ? 'Pause' : 'Play'}
+                >
+                    <svg
+                        class="h-6 w-6 fill-none stroke-current stroke-1"
+                        viewBox="-4 -4 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                        preserveAspectRatio="xMidYMid meet"
+                    >
+                        {#if isPlaying}
+                            <path
+                                d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"
+                            />
+                        {:else}
+                            <path
+                                d="M3 1.713a.7.7 0 0 1 1.05-.607l10.89 6.288a.7.7 0 0 1 0 1.212L4.05 14.894A.7.7 0 0 1 3 14.288V1.713z"
+                            />
+                        {/if}
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

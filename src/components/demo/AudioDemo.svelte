@@ -13,7 +13,7 @@
     import SeekingPanel from './SeekingPanel.svelte'
     import type { Track } from './Playlist.svelte'
 
-    const TABS = ['EQ', 'Reverb', 'MS Processor', 'Speed/Pitch', 'Snips', 'Seeking'] as const
+    const TABS = ['snip', 'speed', 'fx|eq', 'ms', 'seek'] as const
     type Tab = (typeof TABS)[number]
 
     const DEFAULT_TRACKS: Track[] = [
@@ -29,7 +29,7 @@
     let reverb = $state<ReverbClass | null>(null)
     let msProcessor = $state<MSProcessorClass | null>(null)
     let isInitialized = $state(false)
-    let activeTab = $state<Tab>('EQ')
+    let activeTab = $state<Tab>('snip')
     let tracks = $state<Track[]>([...DEFAULT_TRACKS])
     let currentTrackId = $state(DEFAULT_TRACKS[0].id)
     let uploadCounter = $state(0)
@@ -125,7 +125,7 @@
     })
 </script>
 
-<div class="overflow-hidden rounded-xl border border-white/5 bg-[#181818]">
+<div class="h-full rounded-xl border border-white/5 bg-[#181818]">
     <!-- Hidden audio element -->
     <audio
         bind:this={audioEl}
@@ -145,45 +145,54 @@
         trackTitle={currentTrack?.title ?? 'No track'}
     />
 
-    <!-- Playlist -->
-    <Playlist
-        {tracks}
-        {currentTrackId}
-        onSelect={selectTrack}
-        onToggleBlock={toggleBlock}
-    />
+    <div class="flex justify-between w-full gap-x-4">
+        <!-- Playlist -->
+         <div class="flex w-full">
+            <Playlist
+                {tracks}
+                {currentTrackId}
+                onSelect={selectTrack}
+                onToggleBlock={toggleBlock}
+            />
+        </div>
 
-    <!-- Tab navigation -->
-    <div class="flex flex-wrap border-b border-white/5">
-        {#each TABS as tab}
-            <button
-                onclick={() => (activeTab = tab)}
-                class="border-b-2 px-4 py-3 text-xs font-medium transition
-                    {activeTab === tab
-                    ? 'border-[#1db954] text-[#1db954]'
-                    : 'border-transparent text-[#b3b3b3] hover:text-white'}"
-            >
-                {tab}
-            </button>
-        {/each}
+
+        <div class="flex flex-col w-full min-h-62.5">
+            <!-- Tab navigation -->
+            <div class="flex h-6 items-center w-full gap-x-1 border-b border-white/5 px-4 py-5">
+                {#each TABS as tab}
+                    <button
+                        onclick={() => (activeTab = tab)}
+                        class="rounded-xs px-1.5 py-0 pb-0.5 text-sm font-semibold leading-4.5 text-[#fafafa] transition
+                            {activeTab === tab
+                            ? 'bg-green-700 hover:bg-green-800'
+                            : 'bg-zinc-700 hover:bg-zinc-500'}"
+                    >
+                        {tab}
+                    </button>
+                {/each}
+            </div>
+
+            <!-- Tab content -->
+            <div class="p-5 w-full">
+                {#if activeTab === 'fx|eq'}
+                    <div class="flex h-full w-full justify-center gap-x-2.5">
+                        <ReverbPanel {reverb} isReady={isInitialized} />
+                        <EqualizerPanel {equalizer} isReady={isInitialized} />
+                    </div>
+                {:else if activeTab === 'ms'}
+                    <MSProcessorPanel msProcessor={msProcessor} isReady={isInitialized} />
+                {:else if activeTab === 'speed'}
+                    <SpeedPitchPanel audioManager={audioManager} {audioEl} isReady={isInitialized} />
+                {:else if activeTab === 'snip'}
+                    <SnipsPanel {audioEl} />
+                {:else if activeTab === 'seek'}
+                    <SeekingPanel {audioEl} />
+                {/if}
+            </div>
+        </div>
     </div>
 
-    <!-- Tab content -->
-    <div class="p-5">
-        {#if activeTab === 'EQ'}
-            <EqualizerPanel {equalizer} isReady={isInitialized} />
-        {:else if activeTab === 'Reverb'}
-            <ReverbPanel {reverb} isReady={isInitialized} />
-        {:else if activeTab === 'MS Processor'}
-            <MSProcessorPanel msProcessor={msProcessor} isReady={isInitialized} />
-        {:else if activeTab === 'Speed/Pitch'}
-            <SpeedPitchPanel audioManager={audioManager} {audioEl} isReady={isInitialized} />
-        {:else if activeTab === 'Snips'}
-            <SnipsPanel {audioEl} />
-        {:else if activeTab === 'Seeking'}
-            <SeekingPanel {audioEl} />
-        {/if}
-    </div>
 
     <!-- Status bar -->
     <div class="flex items-center justify-between border-t border-white/5 px-4 py-2 text-[10px] text-[#b3b3b3]">

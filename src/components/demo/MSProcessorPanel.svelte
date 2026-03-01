@@ -1,7 +1,10 @@
 <script lang="ts">
+    import { RotateCcw } from '@lucide/svelte'
     import type MSProcessorClass from '../../lib/audio-effects/ms-processor'
     import type { MSParams } from '../../lib/audio-effects/ms-processor'
     import { basicPresets, advancedPresets, MS_PRESETS } from '../../lib/audio-effects/ms-processor/presets'
+    import CustomSelect from './ui/CustomSelect.svelte'
+    import CustomSlider from './ui/CustomSlider.svelte'
 
     let {
         msProcessor,
@@ -11,34 +14,40 @@
         isReady: boolean
     } = $props()
 
-    const MODE_LABELS: Record<number, string> = {
-        0: 'Bypass',
-        1: 'Left Only',
-        2: 'Right Only',
-        3: 'Mid Only',
-        4: 'Side Only',
-        5: 'Width Control',
-        6: 'Swap L/R',
-        7: 'Mono',
-        8: 'Reverse Phase'
-    }
-
+    let activePreset = $state('none')
     let mode = $state(0)
     let width = $state(100)
     let midGain = $state(0)
     let sideGain = $state(0)
     let balance = $state(0)
-    let activePreset = $state<string | null>(null)
 
-    function applyParams() {
-        if (!msProcessor || !isReady) return
-        const params: MSParams = { mode, width, midGain, sideGain, balance }
-        msProcessor.applyManualParams(params)
-    }
+    const basicOptions = [
+        { label: 'none', value: 'none' },
+        ...basicPresets.map((p) => ({ label: p, value: p }))
+    ]
+    const advancedOptions = [
+        { label: 'none', value: 'none' },
+        ...advancedPresets.map((p) => ({ label: p, value: p }))
+    ]
 
-    function selectPreset(name: string) {
-        activePreset = name
-        const preset = MS_PRESETS[name]
+    let topSelected = $derived(basicPresets.includes(activePreset))
+    let isWidthMode = $derived(mode === 5)
+
+    const modeOptions = [
+        { label: 'bypass', value: '0' },
+        { label: 'left-only', value: '1' },
+        { label: 'right-only', value: '2' },
+        { label: 'mid-only', value: '3' },
+        { label: 'side-only', value: '4' },
+        { label: 'width', value: '5' },
+        { label: 'swap', value: '6' },
+        { label: 'mono', value: '7' },
+        { label: 'reverse-phase', value: '8' }
+    ]
+
+    function handleUpdateEffect(value: string) {
+        activePreset = value
+        const preset = MS_PRESETS[value]
         if (preset) {
             mode = preset.mode
             width = preset.width
@@ -47,148 +56,68 @@
             balance = preset.balance
         }
         if (msProcessor && isReady) {
-            msProcessor.setMSEffect(name)
+            msProcessor.setMSEffect(value)
         }
     }
 
-    function disable() {
-        activePreset = null
+    function handleModeChange(value: string) {
+        mode = parseInt(value)
+        applyParams()
+    }
+
+    function applyParams() {
+        if (!msProcessor || !isReady) return
+        const params: MSParams = { mode, width, midGain, sideGain, balance }
+        msProcessor.applyManualParams(params)
+    }
+
+    function reset() {
+        handleUpdateEffect('none')
         mode = 0
         width = 100
         midGain = 0
         sideGain = 0
         balance = 0
-        if (msProcessor && isReady) {
-            msProcessor.setMSEffect('none')
-        }
     }
-
-    function formatPresetName(name: string): string {
-        return name
-            .replace(/-/g, ' ')
-            .replace(/\b\w/g, (c) => c.toUpperCase())
-    }
-
-    $effect(() => {
-        // React to manual slider changes
-        mode; width; midGain; sideGain; balance;
-        if (activePreset === null) return
-        activePreset = null
-        applyParams()
-    })
 </script>
 
-<div class="space-y-4">
-    <!-- Presets -->
-    <div class="space-y-2">
-        <div class="flex items-center justify-between">
-            <span class="text-xs font-medium uppercase tracking-wider text-[#b3b3b3]">Basic Modes</span>
-            <button
-                onclick={disable}
-                class="rounded px-2 py-1 text-xs text-[#b3b3b3] transition hover:text-white"
-            >
-                Bypass
-            </button>
+<div class="flex w-full flex-col gap-y-2.5">
+    <!-- AudioEffectInputs section -->
+    <h2 class="text-base leading-none text-gray-400">msProcessor</h2>
+
+    <div class="flex w-full flex-col gap-y-1.5">
+        <div class="flex flex-col">
+            <span class="w-full text-sm text-gray-400">channel modes</span>
+            <CustomSelect
+                size="md"
+                selected={topSelected ? activePreset : 'none'}
+                options={basicOptions}
+                onValueChange={handleUpdateEffect}
+            />
         </div>
-        <div class="flex flex-wrap gap-1.5">
-            {#each basicPresets as name}
-                <button
-                    onclick={() => selectPreset(name)}
-                    class="rounded-full px-3 py-1 text-xs transition
-                        {activePreset === name
-                        ? 'bg-[#1db954] text-black'
-                        : 'border border-white/10 text-[#b3b3b3] hover:border-white/20 hover:text-white'}"
-                >
-                    {formatPresetName(name)}
-                </button>
-            {/each}
+
+        <div class="flex flex-col">
+            <span class="w-full text-sm text-gray-400">stereo processing</span>
+            <CustomSelect
+                size="md"
+                selected={!topSelected ? activePreset : 'none'}
+                options={advancedOptions}
+                onValueChange={handleUpdateEffect}
+            />
         </div>
     </div>
 
-    <div class="space-y-2">
-        <span class="text-xs font-medium uppercase tracking-wider text-[#b3b3b3]">Advanced Presets</span>
-        <div class="flex flex-wrap gap-1.5">
-            {#each advancedPresets as name}
-                <button
-                    onclick={() => selectPreset(name)}
-                    class="rounded-full px-3 py-1 text-xs transition
-                        {activePreset === name
-                        ? 'bg-[#1db954] text-black'
-                        : 'border border-white/10 text-[#b3b3b3] hover:border-white/20 hover:text-white'}"
-                >
-                    {formatPresetName(name)}
-                </button>
-            {/each}
-        </div>
-    </div>
+    <div class="mt-1 h-0.5 w-full bg-zinc-700"></div>
 
-    <!-- Manual controls -->
-    <div class="space-y-3 rounded-lg border border-white/5 bg-white/5 p-4">
-        <span class="text-xs font-medium uppercase tracking-wider text-[#b3b3b3]">Manual Controls</span>
-
-        <div class="space-y-2">
-            <div class="flex items-center justify-between text-xs">
-                <span class="text-[#b3b3b3]">Mode</span>
-                <span class="text-white">{MODE_LABELS[mode] ?? 'Unknown'}</span>
-            </div>
-
-            {#if mode === 5}
-                <div class="flex items-center justify-between text-xs">
-                    <span class="text-[#b3b3b3]">Width</span>
-                    <span class="text-white">{width}%</span>
-                </div>
-                <input
-                    type="range"
-                    min="0"
-                    max="200"
-                    step="1"
-                    bind:value={width}
-                    oninput={applyParams}
-                    class="w-full accent-[#1db954]"
-                />
-            {/if}
-
-            <div class="flex items-center justify-between text-xs">
-                <span class="text-[#b3b3b3]">Mid Gain</span>
-                <span class="text-white">{midGain} dB</span>
-            </div>
-            <input
-                type="range"
-                min="-12"
-                max="12"
-                step="0.5"
-                bind:value={midGain}
-                oninput={applyParams}
-                class="w-full accent-[#1db954]"
-            />
-
-            <div class="flex items-center justify-between text-xs">
-                <span class="text-[#b3b3b3]">Side Gain</span>
-                <span class="text-white">{sideGain} dB</span>
-            </div>
-            <input
-                type="range"
-                min="-12"
-                max="12"
-                step="0.5"
-                bind:value={sideGain}
-                oninput={applyParams}
-                class="w-full accent-[#1db954]"
-            />
-
-            <div class="flex items-center justify-between text-xs">
-                <span class="text-[#b3b3b3]">Balance</span>
-                <span class="text-white">{balance}</span>
-            </div>
-            <input
-                type="range"
-                min="-100"
-                max="100"
-                step="1"
-                bind:value={balance}
-                oninput={applyParams}
-                class="w-full accent-[#1db954]"
-            />
-        </div>
+    <div class="flex w-full justify-between">
+        <button
+            class="flex h-6 w-7 items-center justify-center rounded-none text-zinc-400 hover:text-white"
+            onclick={reset}
+        >
+            <RotateCcw size={16} />
+        </button>
+        <p class="inline-flex w-full justify-end text-sm text-white">
+            {activePreset}
+        </p>
     </div>
 </div>

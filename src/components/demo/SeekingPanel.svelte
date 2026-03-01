@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { Rewind, FastForward } from '@lucide/svelte'
+    import { Minus, Plus } from '@lucide/svelte'
+    import BadgeList from './ui/BadgeList.svelte'
 
     let {
         audioEl
@@ -7,102 +8,120 @@
         audioEl: HTMLAudioElement | null
     } = $props()
 
-    let seekDuration = $state(10)
-    let currentTime = $state(0)
-    let duration = $state(0)
-
-    const SEEK_OPTIONS = [5, 10, 15, 30]
-
-    function seekForward() {
-        if (!audioEl) return
-        audioEl.currentTime = Math.min(audioEl.currentTime + seekDuration, audioEl.duration || 0)
-    }
+    let rewindValue = $state(10)
+    let forwardValue = $state(10)
 
     function seekBackward() {
         if (!audioEl) return
-        audioEl.currentTime = Math.max(audioEl.currentTime - seekDuration, 0)
+        audioEl.currentTime = Math.max(audioEl.currentTime - rewindValue, 0)
     }
 
-    function formatTime(seconds: number): string {
-        const m = Math.floor(seconds / 60)
-        const s = Math.floor(seconds % 60)
-        return `${m}:${s.toString().padStart(2, '0')}`
-    }
-
-    $effect(() => {
+    function seekForward() {
         if (!audioEl) return
+        audioEl.currentTime = Math.min(audioEl.currentTime + forwardValue, audioEl.duration || 0)
+    }
 
-        const onTimeUpdate = () => (currentTime = audioEl!.currentTime)
-        const onLoadedMetadata = () => (duration = audioEl!.duration)
-        const onDurationChange = () => {
-            if (audioEl!.duration && isFinite(audioEl!.duration)) {
-                duration = audioEl!.duration
-            }
-        }
+    function handleRewindClick(e: MouseEvent) {
+        const target = e.currentTarget as HTMLButtonElement
+        const isMinus = target.id.includes('minus')
+        rewindValue = Math.min(Math.max(rewindValue + (isMinus ? -1 : 1), 1), 60)
+    }
 
-        audioEl.addEventListener('timeupdate', onTimeUpdate)
-        audioEl.addEventListener('loadedmetadata', onLoadedMetadata)
-        audioEl.addEventListener('durationchange', onDurationChange)
-
-        return () => {
-            audioEl!.removeEventListener('timeupdate', onTimeUpdate)
-            audioEl!.removeEventListener('loadedmetadata', onLoadedMetadata)
-            audioEl!.removeEventListener('durationchange', onDurationChange)
-        }
-    })
+    function handleForwardClick(e: MouseEvent) {
+        const target = e.currentTarget as HTMLButtonElement
+        const isMinus = target.id.includes('minus')
+        forwardValue = Math.min(Math.max(forwardValue + (isMinus ? -1 : 1), 1), 60)
+    }
 </script>
 
-<div class="space-y-5">
-    <span class="text-xs font-medium uppercase tracking-wider text-[#b3b3b3]">Seeking Controls</span>
-
-    <!-- Current position -->
-    <div class="text-center">
-        <span class="text-2xl font-bold">{formatTime(currentTime)}</span>
-        <span class="text-sm text-[#b3b3b3]"> / {formatTime(duration)}</span>
-    </div>
-
-    <!-- Seek buttons -->
-    <div class="flex items-center justify-center gap-6">
-        <button
-            onclick={seekBackward}
-            class="group flex flex-col items-center gap-1"
-        >
-            <div class="flex h-14 w-14 items-center justify-center rounded-full border border-white/10 transition group-hover:border-[#1db954]/30 group-hover:bg-[#1db954]/10">
-                <Rewind size={24} class="text-[#b3b3b3] transition group-hover:text-[#1db954]" />
-            </div>
-            <span class="text-xs text-[#b3b3b3]">-{seekDuration}s</span>
-        </button>
-
-        <button
-            onclick={seekForward}
-            class="group flex flex-col items-center gap-1"
-        >
-            <div class="flex h-14 w-14 items-center justify-center rounded-full border border-white/10 transition group-hover:border-[#1db954]/30 group-hover:bg-[#1db954]/10">
-                <FastForward size={24} class="text-[#b3b3b3] transition group-hover:text-[#1db954]" />
-            </div>
-            <span class="text-xs text-[#b3b3b3]">+{seekDuration}s</span>
-        </button>
-    </div>
-
-    <!-- Duration selector -->
-    <div class="space-y-2">
-        <span class="text-center text-xs text-[#b3b3b3]">Seek Duration</span>
-        <div class="flex justify-center gap-2">
-            {#each SEEK_OPTIONS as option}
+<div class="flex w-full flex-col justify-center space-y-2 py-2">
+    <div class="flex items-center justify-between">
+        <!-- Rewind SeekInput -->
+        <div class="flex flex-col items-center gap-y-2">
+            <BadgeList list={[5, 10, 15, 30]} handleSelect={(v) => { rewindValue = v }} />
+            <div class="flex w-full items-center justify-between">
                 <button
-                    onclick={() => (seekDuration = option)}
-                    class="rounded-full px-4 py-1.5 text-xs font-medium transition
-                        {seekDuration === option
-                        ? 'bg-[#1db954] text-black'
-                        : 'border border-white/10 text-[#b3b3b3] hover:border-white/20 hover:text-white'}"
+                    id="seek-rewind-minus"
+                    onclick={handleRewindClick}
+                    class="flex h-8 w-8 items-center justify-center rounded-sm border-none bg-zinc-700 hover:bg-zinc-800"
                 >
-                    {option}s
+                    <Minus color="white" size={24} />
                 </button>
-            {/each}
+                <div class="relative h-12">
+                    <button onclick={seekBackward} class="relative h-full cursor-pointer border-none bg-transparent p-0">
+                        <span
+                            class="absolute left-1/2 top-1/2 z-10 h-7 w-8 -translate-x-1/2 -translate-y-1/2 border-none bg-transparent px-0.5 py-0 text-center text-xl text-white"
+                        >{rewindValue}</span>
+                        <svg
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-full scale-x-100 fill-none"
+                        >
+                            <g
+                                class="stroke-[#1ed760] stroke-[1.5]"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="m14.55 21.67c4.29-1.13 7.45-5.03 7.45-9.67 0-5.52-4.44-10-10-10-6.67 0-10 5.56-10 5.56m0 0v-4.56m0 4.56h2.01 2.43"
+                                ></path>
+                                <path d="m2 12c0 5.52 4.48 10 10 10" opacity=".4" stroke-dasharray="3 3"></path>
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+                <button
+                    id="seek-rewind-plus"
+                    onclick={handleRewindClick}
+                    class="flex h-8 w-8 items-center justify-center rounded-sm border-none bg-zinc-700 hover:bg-zinc-800"
+                >
+                    <Plus color="white" size={24} />
+                </button>
+            </div>
+        </div>
+
+        <!-- Forward SeekInput -->
+        <div class="flex flex-col items-center gap-y-2">
+            <BadgeList list={[5, 10, 15, 30]} handleSelect={(v) => { forwardValue = v }} />
+            <div class="flex w-full items-center justify-between">
+                <button
+                    id="seek-forward-minus"
+                    onclick={handleForwardClick}
+                    class="flex h-8 w-8 items-center justify-center rounded-sm border-none bg-zinc-700 hover:bg-zinc-800"
+                >
+                    <Minus color="white" size={24} />
+                </button>
+                <div class="relative h-12">
+                    <button onclick={seekForward} class="relative h-full cursor-pointer border-none bg-transparent p-0">
+                        <span
+                            class="absolute left-1/2 top-1/2 z-10 h-7 w-8 -translate-x-1/2 -translate-y-1/2 border-none bg-transparent px-0.5 py-0 text-center text-xl text-white"
+                        >{forwardValue}</span>
+                        <svg
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-full scale-x-[-1] fill-none"
+                        >
+                            <g
+                                class="stroke-[#1ed760] stroke-[1.5]"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="m14.55 21.67c4.29-1.13 7.45-5.03 7.45-9.67 0-5.52-4.44-10-10-10-6.67 0-10 5.56-10 5.56m0 0v-4.56m0 4.56h2.01 2.43"
+                                ></path>
+                                <path d="m2 12c0 5.52 4.48 10 10 10" opacity=".4" stroke-dasharray="3 3"></path>
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+                <button
+                    id="seek-forward-plus"
+                    onclick={handleForwardClick}
+                    class="flex h-8 w-8 items-center justify-center rounded-sm border-none bg-zinc-700 hover:bg-zinc-800"
+                >
+                    <Plus color="white" size={24} />
+                </button>
+            </div>
         </div>
     </div>
-
-    <p class="text-center text-xs text-[#b3b3b3]">
-        In Chorus, seek durations are configurable per content type — shorter for music, longer for podcasts and audiobooks.
-    </p>
 </div>
