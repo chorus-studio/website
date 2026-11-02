@@ -2,13 +2,6 @@
 import Landing from '../../layouts/Landing.astro'
 import UninstallForm from '../../components/UninstallForm.astro'
 import { YOUTUBE_EARLY_ACCESS } from '../../lib/site'
-
-const reasons = [
-    "It didn't work as expected",
-    "I don't watch YouTube in the browser anymore",
-    'I found a better alternative',
-    'Other'
-]
 ---
 
 <Landing
@@ -21,16 +14,16 @@ const reasons = [
             <div class="absolute top-0 left-1/2 -ml-90 size-180 rounded-full bg-host opacity-10 blur-[120px]"></div>
         </div>
 
-        <div class="relative mx-auto flex max-w-xl flex-col gap-10">
+        <div class="relative mx-auto flex max-w-2xl flex-col gap-10">
             <header class="flex flex-col gap-4 text-center">
                 <span class="font-code text-xs tracking-[0.2em] text-host">CHORUS FOR YOUTUBE · UNINSTALLED</span>
                 <h1 class="m-0 font-display text-[clamp(36px,6vw,56px)] leading-none font-bold tracking-[-0.035em]">Sorry to see you go.</h1>
                 <p class="m-0 text-[17px] leading-relaxed text-[#b3b3b3]">
-                    Tell us why and we'll make it better. It takes ten seconds.
+                    Tell us what you used it for and why you left. It takes a minute and goes straight to the Chorus inbox.
                 </p>
             </header>
 
-            <UninstallForm host="youtube" reasons={reasons} />
+            <UninstallForm host="youtube" />
 
             <div class="flex flex-col items-center gap-3 text-center">
                 <p class="m-0 text-[15px] text-[#b3b3b3]">Changed your mind? Early builds are in the Discord.</p>

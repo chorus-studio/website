@@ -1,0 +1,180 @@
+---
+import Landing from '../layouts/Landing.astro'
+import { LINKS, SUPPORT_TOPICS } from '../lib/site'
+
+const shortcuts = [
+    { href: '/#faq', title: 'FAQ', body: 'Free or paid, privacy, browsers, ads.' },
+    { href: LINKS.docs, title: 'Docs', body: 'Setup and every feature, step by step.' },
+    { href: LINKS.discord, title: 'Discord', body: 'The quickest answers, from people who use it daily.' },
+    { href: LINKS.issues, title: 'Bug tracker', body: 'Report a bug or request a feature in public.' }
+]
+const extensions = [
+    ['spotify', 'Chorus for Spotify'],
+    ['youtube', 'Chorus for YouTube'],
+    ['', 'Not sure']
+]
+
+const heading = 'text-[17px] font-semibold'
+const legend = `${heading} mb-3`
+const option =
+    'flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-white/8 bg-[#161616] px-3 text-center text-sm transition-colors hover:border-white/20 has-checked:border-host has-checked:bg-host/8 has-focus-visible:outline-2 has-focus-visible:outline-host'
+const field =
+    'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[15px] text-white outline-none placeholder:text-[#7f7f7f] focus:border-host/60'
+---
+
+<Landing title="Support | Chorus" description="Get help with Chorus for Spotify or Chorus for YouTube.">
+    <section class="relative px-6 pt-16 pb-24">
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0 -top-30 overflow-hidden">
+            <div class="absolute top-0 left-1/2 -ml-90 size-180 rounded-full bg-host opacity-10 blur-[120px]"></div>
+        </div>
+
+        <div class="relative mx-auto flex max-w-245 flex-col gap-12">
+            <header class="flex max-w-170 flex-col gap-4">
+                <span class="font-code text-xs tracking-[0.2em] text-host">SUPPORT</span>
+                <h1 class="m-0 font-display text-[clamp(40px,6.4vw,72px)] leading-[0.98] font-bold tracking-[-0.035em]">How can we help?</h1>
+                <p class="m-0 text-lg leading-relaxed text-[#b3b3b3]">
+                    Questions about either extension are welcome. Many are already answered below; for anything else, write to us and
+                    we'll reply by email.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
+                {
+                    shortcuts.map((item) => (
+                        <a
+                            href={item.href}
+                            class="reveal flex flex-col gap-1.5 rounded-2xl border border-white/8 bg-[#121212] p-5 transition-[translate,border-color] duration-200 hover:-translate-y-0.5 hover:border-white/20"
+                        >
+                            <span class="font-display text-lg font-bold">{item.title} →</span>
+                            <span class="text-sm leading-normal text-[#a8a8a8]">{item.body}</span>
+                        </a>
+                    ))
+                }
+            </div>
+
+            <form
+                data-support-form
+                class="flex flex-col gap-8 rounded-[22px] border border-white/8 bg-[#121212] p-[clamp(20px,4vw,32px)]"
+            >
+                <h2 class="m-0 font-display text-[28px] font-bold tracking-[-0.02em]">Write to us</h2>
+
+                <fieldset>
+                    <legend class={legend}>Which extension is it about?</legend>
+                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                        {
+                            extensions.map(([value, label]) => (
+                                <label class={option}>
+                                    <input type="radio" name="host" value={value} class="sr-only" />
+                                    {label}
+                                </label>
+                            ))
+                        }
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend class={legend}>What's it about?</legend>
+                    <div class="grid grid-cols-2 gap-2 md:grid-cols-5">
+                        {
+                            SUPPORT_TOPICS.map((topic) => (
+                                <label class={option}>
+                                    <input type="radio" name="topic" value={topic} class="sr-only" />
+                                    {topic}
+                                </label>
+                            ))
+                        }
+                    </div>
+                </fieldset>
+
+                <label class="flex flex-col gap-2">
+                    <span class={heading}>Subject <span class="text-sm font-normal text-[#8a8a8a]">(optional)</span></span>
+                    <input type="text" name="subject" maxlength="160" placeholder="Snips stop after an ad" class={field} />
+                </label>
+
+                <label class="flex flex-col gap-2">
+                    <span class={heading}>Message</span>
+                    <textarea
+                        name="message"
+                        rows="7"
+                        required
+                        maxlength="4000"
+                        placeholder="What happened, what you expected, and the steps to see it again."
+                        class={field}
+                    ></textarea>
+                </label>
+
+                <label class="flex flex-col gap-2">
+                    <span class={heading}>Your email</span>
+                    <input type="email" name="email" required autocomplete="email" placeholder="you@example.com" class={field} />
+                    <span class="text-sm text-[#8a8a8a]">Only used to reply to you.</span>
+                </label>
+
+                <!-- A field people never see; bots fill it in and the endpoint drops their send. -->
+                <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="sr-only" />
+
+                <div class="flex flex-col gap-3">
+                    <button
+                        type="submit"
+                        class="min-h-12 rounded-xl bg-host-strong font-semibold text-host-ink transition-opacity hover:opacity-90 disabled:opacity-50"
+                    >
+                        Send message
+                    </button>
+                    <p data-form-message role="status" class="hidden text-center text-sm"></p>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        import { browserName } from '../lib/browser'
+
+        const form = document.querySelector<HTMLFormElement>('[data-support-form]')!
+        const message = form.querySelector<HTMLParagraphElement>('[data-form-message]')!
+        const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!
+        const say = (text: string, ok: boolean) => {
+            message.textContent = text
+            message.className = `text-center text-sm ${ok ? 'text-host' : 'text-[#f15e6c]'}`
+        }
+
+        // Start on the extension the visitor is browsing (?host= or their last pick on the home page).
+        const current = document.documentElement.dataset.host === 'youtube' ? 'youtube' : 'spotify'
+        form.querySelector<HTMLInputElement>(`input[name="host"][value="${current}"]`)!.checked = true
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault()
+            const data = new FormData(form)
+            // The extension can link here with ?version= (and ?browser=).
+            const params = new URLSearchParams(location.search)
+            button.disabled = true
+            button.textContent = 'Sending…'
+            try {
+                const response = await fetch('/api/support', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        host: data.get('host') ?? '',
+                        topic: data.get('topic') ?? '',
+                        subject: data.get('subject') ?? '',
+                        email: data.get('email') ?? '',
+                        message: data.get('message') ?? '',
+                        version: params.get('version') ?? '',
+                        browser: params.get('browser') ?? browserName(),
+                        pageUrl: location.href,
+                        honeypot: data.get('website') ?? ''
+                    })
+                })
+                const result = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null
+                if (response.ok && result?.ok) {
+                    say("Thanks, it's on its way. We'll reply to your email.", true)
+                    button.textContent = 'Sent'
+                    return
+                }
+                say(result?.error ?? 'Something went wrong sending your message. Please try again.', false)
+            } catch {
+                say("Couldn't reach the support service. Please try again, or ask on the Discord.", false)
+            }
+            button.disabled = false
+            button.textContent = 'Send message'
+        })
+    </script>
+</Landing>

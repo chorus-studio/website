@@ -11,5 +11,7 @@ name = "SEND_EMAIL"
 # No destination_address: it sends to the RECIPIENT secret, which must be a verified
 # Email Routing destination address on the account.
 
+# One sender per kind of email, both on chorusstudio.org (Email Routing).
 [vars]
-SENDER = "support@chorusstudio.org"
+SUPPORT_SENDER = "support@chorusstudio.org"
+FEEDBACK_SENDER = "feedback@chorusstudio.org"

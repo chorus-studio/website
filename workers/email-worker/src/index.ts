@@ -1,23 +1,31 @@
-// Sends the site's emails (uninstall feedback today) to the Chorus inbox. Called only by the
-// Pages Function through the EMAIL_WORKER service binding: POST /send { subject, body, replyEmail }.
+// Sends the site's emails to the Chorus inbox. Called only by the Pages Functions through the
+// EMAIL_WORKER service binding: POST /send { kind, subject, body, replyEmail }.
 import { EmailMessage } from 'cloudflare:email'
 
 interface Env {
     SEND_EMAIL: { send(message: EmailMessage): Promise<void> }
-    /** An address on chorusstudio.org (wrangler.toml); it doesn't need a mailbox. */
-    SENDER: string
+    /** Senders on chorusstudio.org (wrangler.toml); they don't need mailboxes. */
+    SUPPORT_SENDER: string
+    FEEDBACK_SENDER: string
     /** A verified Email Routing destination, set with `wrangler secret put RECIPIENT`. */
     RECIPIENT?: string
 }
 
-type Payload = { subject?: unknown; body?: unknown; replyEmail?: unknown }
+type Payload = { kind?: unknown; subject?: unknown; body?: unknown; replyEmail?: unknown }
+
+/** Who an email comes from, by kind: support requests and uninstall feedback. */
+function senderFor(kind: unknown, env: Env) {
+    if (kind === 'support') return { name: 'Chorus Support', address: env.SUPPORT_SENDER }
+    if (kind === 'feedback') return { name: 'Chorus Feedback', address: env.FEEDBACK_SENDER }
+    return null
+}
 
 /** Header values can't carry line breaks, or they could add headers of their own. */
 const oneLine = (value: string) => value.replace(/[\r\n]+/g, ' ').trim()
 
-function buildRawEmail(from: string, to: string, subject: string, body: string, replyEmail: string) {
+function buildRawEmail(from: { name: string; address: string }, to: string, subject: string, body: string, replyEmail: string) {
     const headers = [
-        `From: Chorus <${from}>`,
+        `From: ${from.name} <${from.address}>`,
         `To: ${to}`,
         `Subject: ${oneLine(subject)}`,
         `Date: ${new Date().toUTCString()}`,
@@ -43,14 +51,17 @@ export default {
             return Response.json({ ok: false, error: 'Expected a JSON body' }, { status: 400 })
         }
 
+        const from = senderFor(payload.kind, env)
+        if (!from) return Response.json({ ok: false, error: 'Unknown kind' }, { status: 400 })
+
         const subject = typeof payload.subject === 'string' ? payload.subject : ''
         const body = typeof payload.body === 'string' ? payload.body : ''
         const replyEmail = typeof payload.replyEmail === 'string' ? payload.replyEmail : ''
         if (!subject || !body) return Response.json({ ok: false, error: 'Missing subject or body' }, { status: 400 })
 
         try {
-            const raw = buildRawEmail(env.SENDER, env.RECIPIENT, subject, body, replyEmail)
-            await env.SEND_EMAIL.send(new EmailMessage(env.SENDER, env.RECIPIENT, raw))
+            const raw = buildRawEmail(from, env.RECIPIENT, subject, body, replyEmail)
+            await env.SEND_EMAIL.send(new EmailMessage(from.address, env.RECIPIENT, raw))
         } catch (error) {
             console.error('Email worker error:', error)
             return Response.json({ ok: false, error: 'Failed to send email' }, { status: 500 })
