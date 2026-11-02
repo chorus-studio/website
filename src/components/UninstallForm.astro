@@ -17,7 +17,7 @@ const { host, reasons } = Astro.props
         <legend class="mb-3 text-[17px] font-semibold">Why did you uninstall Chorus?</legend>
         {
             reasons.map((reason) => (
-                <label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-white/8 bg-[#161616] px-4 transition-colors hover:border-white/20 has-[:checked]:border-host has-[:checked]:bg-host/8">
+                <label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-white/8 bg-[#161616] px-4 transition-colors hover:border-white/20 has-checked:border-host has-checked:bg-host/8">
                     <input type="radio" name="reason" value={reason} class="size-4 accent-host" />
                     <span class="text-[15px]">{reason}</span>
                 </label>
@@ -33,6 +33,8 @@ const { host, reasons } = Astro.props
             class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[15px] text-white outline-none placeholder:text-[#7f7f7f] focus:border-host/60"
         ></textarea>
     </label>
+    <!-- A field people never see; bots fill it in and the endpoint drops their send. -->
+    <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="sr-only" />
     <button
         type="submit"
         class="min-h-12 rounded-xl bg-host-strong font-semibold text-host-ink transition-opacity hover:opacity-90 disabled:opacity-50"
@@ -60,11 +62,16 @@ const { host, reasons } = Astro.props
             }
 
             try {
-                // Delivered by a Cloudflare Worker that lives outside this repo.
+                // Sent on by the Pages Function in functions/api/uninstall-feedback.ts.
                 await fetch('/api/uninstall-feedback', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reason, details: data.get('details'), host: form.dataset.host })
+                    body: JSON.stringify({
+                        reason,
+                        details: data.get('details'),
+                        host: form.dataset.host,
+                        honeypot: data.get('website')
+                    })
                 })
             } catch {
                 // Thank them either way; a failed send isn't something they can fix.

@@ -106,11 +106,11 @@ const reasons = [
             }
 
             try {
-                // POST to Cloudflare Worker endpoint for email delivery
+                // Sent on by the Pages Function in functions/api/uninstall-feedback.ts
                 const response = await fetch('/api/uninstall-feedback', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reason, details })
+                    body: JSON.stringify({ reason, details, host: 'spotify' })
                 })
 
                 if (response.ok) {
