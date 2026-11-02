@@ -1,0 +1,164 @@
+import type AudioManager from '../audio-manager'
+import { customPresets, getParamsListForEffect, impulsePresets } from './presets'
+
+export default class Reverb {
+    _internal: boolean
+    _audioManager: AudioManager
+    _audioContext?: AudioContext
+    _reverbGainNode?: GainNode
+    _convolverNode?: ConvolverNode
+    _reverbWorkletNode?: AudioWorkletNode
+
+    constructor(audioManager: AudioManager, internal = false) {
+        this._audioManager = audioManager
+        this._internal = internal
+    }
+
+    isCustom(effect: string) {
+        return customPresets.includes(effect)
+    }
+
+    isImpulse(effect: string) {
+        return impulsePresets.includes(effect)
+    }
+
+    async setReverbEffect(effect: string) {
+        if (!this._audioManager.audioContext) {
+            return
+        }
+
+        this._audioContext = this._audioManager.audioContext
+
+        this.cleanup()
+
+        if (effect === 'none') {
+            if (this._audioManager.audioContext) {
+                this._audioManager.removeEffect('reverb')
+            }
+            return
+        }
+
+        try {
+            const isImpulse = this.isImpulse(effect)
+            if (isImpulse) {
+                await this.createImpulseReverb(effect)
+            } else {
+                await this.createDigitalReverb()
+                this.connectDigitalReverb()
+                this.applyReverbEffect(effect)
+            }
+        } catch (error) {
+            console.error('Error setting reverb effect:', error)
+            this.cleanup()
+            if (this._audioManager.audioContext) {
+                this._audioManager.disconnect()
+            }
+            throw error
+        }
+    }
+
+    async createImpulseReverb(effect: string) {
+        if (!this._audioContext) throw new Error('AudioContext not initialized')
+
+        this._convolverNode = this._convolverNode ?? this._audioContext.createConvolver()
+
+        const filename = effect.replace('_ir', '')
+        const response = await fetch(`/sounds/${filename}.wav`)
+        if (!response.ok) throw new Error(`Failed to load impulse response: ${effect}`)
+
+        const arraybuffer = await response.arrayBuffer()
+        this._convolverNode.buffer = await this._audioContext.decodeAudioData(arraybuffer)
+
+        if (!this._audioManager.source || !this._convolverNode) {
+            throw new Error('Audio nodes not properly initialized')
+        }
+
+        this._audioManager.connectImpulseReverb({
+            convolverNode: this._convolverNode,
+            effect
+        })
+    }
+
+    private cleanup() {
+        if (this._reverbWorkletNode) {
+            try {
+                this._reverbWorkletNode.disconnect()
+            } catch (e) {
+                // Ignore disconnect errors during cleanup
+            }
+            this._reverbWorkletNode = undefined
+        }
+        if (this._reverbGainNode) {
+            try {
+                this._reverbGainNode.disconnect()
+            } catch (e) {
+                // Ignore disconnect errors during cleanup
+            }
+            this._reverbGainNode = undefined
+        }
+        if (this._convolverNode) {
+            try {
+                this._convolverNode.disconnect()
+            } catch (e) {
+                // Ignore disconnect errors during cleanup
+            }
+            this._convolverNode = undefined
+        }
+    }
+
+    connectDigitalReverb() {
+        if (!this._reverbWorkletNode) {
+            throw new Error('Audio nodes not properly initialized')
+        }
+
+        this._audioManager.connectDigitalReverb(this._reverbWorkletNode!)
+    }
+
+    async createDigitalReverb() {
+        if (!this._audioContext) {
+            throw new Error('AudioContext not initialized')
+        }
+
+        await this._audioContext.audioWorklet.addModule('/worklets/processor.js')
+
+        this._reverbGainNode = this._reverbGainNode ?? this._audioContext.createGain()
+
+        this._reverbWorkletNode =
+            this._reverbWorkletNode ??
+            new AudioWorkletNode(this._audioContext, 'DattorroReverb', {
+                channelCountMode: 'explicit',
+                channelCount: 2,
+                outputChannelCount: [2]
+            })
+    }
+
+    async applyReverbEffect(effect: string) {
+        if (effect === 'none') {
+            this.cleanup()
+            return this._audioManager.disconnect()
+        }
+
+        try {
+            this.applyReverbEffectParams(effect)
+        } catch (error) {
+            console.error('Error applying reverb effect:', error)
+            throw error
+        }
+    }
+
+    applyReverbEffectParams(effect: string) {
+        if (!this._reverbWorkletNode || !this._audioContext) {
+            throw new Error('Reverb node or AudioContext not initialized')
+        }
+
+        const preset = this.isCustom(effect) ? 'custom' : 'rooms'
+
+        const paramsList = getParamsListForEffect({ effect, preset })
+        paramsList.forEach(({ name, value }: { name: string; value: number }) => {
+            const param = this._reverbWorkletNode?.parameters.get(name)
+            if (param && this._audioContext) {
+                param.linearRampToValueAtTime(value, this._audioContext.currentTime + 0.195)
+            }
+        })
+    }
+}

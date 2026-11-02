@@ -1,0 +1,39 @@
+---
+import Landing from '../../layouts/Landing.astro'
+import UninstallForm from '../../components/UninstallForm.astro'
+import { YOUTUBE_EARLY_ACCESS } from '../../lib/site'
+---
+
+<Landing
+    title="Sorry to see you go | Chorus for YouTube"
+    description="Help us improve Chorus for YouTube by sharing your feedback."
+    host="youtube"
+>
+    <section class="relative px-6 pt-16 pb-24">
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0 -top-30 overflow-hidden">
+            <div class="absolute top-0 left-1/2 -ml-90 size-180 rounded-full bg-host opacity-10 blur-[120px]"></div>
+        </div>
+
+        <div class="relative mx-auto flex max-w-2xl flex-col gap-10">
+            <header class="flex flex-col gap-4 text-center">
+                <span class="font-code text-xs tracking-[0.2em] text-host">CHORUS FOR YOUTUBE · UNINSTALLED</span>
+                <h1 class="m-0 font-display text-[clamp(36px,6vw,56px)] leading-none font-bold tracking-[-0.035em]">Sorry to see you go.</h1>
+                <p class="m-0 text-[17px] leading-relaxed text-[#b3b3b3]">
+                    Tell us what you used it for and why you left. It takes a minute and goes straight to the Chorus inbox.
+                </p>
+            </header>
+
+            <UninstallForm host="youtube" />
+
+            <div class="flex flex-col items-center gap-3 text-center">
+                <p class="m-0 text-[15px] text-[#b3b3b3]">Changed your mind? Early builds are in the Discord.</p>
+                <a
+                    href={YOUTUBE_EARLY_ACCESS}
+                    class="inline-flex min-h-11 items-center rounded-full border border-white/20 px-6 text-sm font-semibold transition-colors hover:bg-white/10"
+                >
+                    Get Chorus for YouTube again
+                </a>
+            </div>
+        </div>
+    </section>
+</Landing>

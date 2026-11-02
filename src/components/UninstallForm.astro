@@ -1,0 +1,174 @@
+---
+interface Props {
+    /** Which extension was removed; sent with the feedback so the two can be told apart. */
+    host: 'spotify' | 'youtube'
+}
+
+const { host } = Astro.props
+const player = host === 'youtube' ? 'YouTube' : 'Spotify'
+
+const usedFor = [
+    'Snips and loops',
+    'Blocking and auto-skip',
+    'Speed, pitch and key',
+    'EQ, reverb and effects',
+    'Presets',
+    'Vocal separation',
+    'Looks and themes',
+    'Picture-in-picture and the popup'
+]
+const reasons = [
+    "I didn't use it enough",
+    'It was missing a feature I wanted',
+    'Something was broken or confusing',
+    `It slowed down or got in the way of ${player}`,
+    `I don't use ${player} in the browser anymore`,
+    "Pricing wasn't a fit",
+    'I prefer another tool',
+    'Other'
+]
+// The values the feedback endpoint accepts (functions/api/uninstall-feedback.ts).
+const plans = [
+    ['free', 'Free'],
+    ['pro-trial', 'Pro trial'],
+    ['pro', 'Pro'],
+    ['not-sure', 'Not sure']
+]
+
+const legend = 'mb-1 text-[17px] font-semibold'
+const hint = 'mb-3 text-sm text-[#8a8a8a]'
+const option =
+    'flex cursor-pointer items-center gap-3 rounded-xl border border-white/8 bg-[#161616] transition-colors hover:border-white/20 has-checked:border-host has-checked:bg-host/8 has-focus-visible:outline-2 has-focus-visible:outline-host'
+const field =
+    'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[15px] text-white outline-none placeholder:text-[#7f7f7f] focus:border-host/60'
+---
+
+<form
+    data-uninstall-form
+    data-host={host}
+    class="flex flex-col gap-8 rounded-[22px] border border-white/8 bg-[#121212] p-[clamp(20px,4vw,32px)]"
+>
+    <fieldset>
+        <legend class={legend}>What did you use Chorus for?</legend>
+        <p class={hint}>Pick any that apply.</p>
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-2">
+            {
+                usedFor.map((label) => (
+                    <label class:list={[option, 'min-h-11 px-3.5 text-sm']}>
+                        <input type="checkbox" name="usedFor" value={label} class="size-4 shrink-0 accent-host" />
+                        {label}
+                    </label>
+                ))
+            }
+        </div>
+    </fieldset>
+
+    <fieldset class="flex flex-col gap-2">
+        <legend class={legend}>What was the biggest reason you uninstalled?</legend>
+        <p class={hint}>Pick one.</p>
+        {
+            reasons.map((reason) => (
+                <label class:list={[option, 'min-h-12 px-4 text-[15px]']}>
+                    <input type="radio" name="reason" value={reason} class="size-4 shrink-0 accent-host" />
+                    {reason}
+                </label>
+            ))
+        }
+    </fieldset>
+
+    <fieldset>
+        <legend class={legend}>Which plan were you on?</legend>
+        <p class={hint}>Optional, but it helps.</p>
+        <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {
+                plans.map(([value, label]) => (
+                    <label class:list={[option, 'min-h-11 justify-center px-3 text-sm']}>
+                        <input type="radio" name="plan" value={value} class="sr-only" />
+                        {label}
+                    </label>
+                ))
+            }
+        </div>
+    </fieldset>
+
+    <label class="flex flex-col gap-2">
+        <span class={legend}>Anything else? <span class="text-sm font-normal text-[#8a8a8a]">(optional)</span></span>
+        <textarea name="details" rows="5" placeholder="What would have made you stay?" class={field}></textarea>
+    </label>
+
+    <label class="flex flex-col gap-2">
+        <span class={legend}>Email, if you'd like a reply <span class="text-sm font-normal text-[#8a8a8a]">(optional)</span></span>
+        <input type="email" name="replyEmail" autocomplete="email" placeholder="you@example.com" class={field} />
+    </label>
+
+    <!-- A field people never see; bots fill it in and the endpoint drops their send. -->
+    <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="sr-only" />
+
+    <div class="flex flex-col gap-3">
+        <button
+            type="submit"
+            class="min-h-12 rounded-xl bg-host-strong font-semibold text-host-ink transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+            Send feedback
+        </button>
+        <p data-form-message role="status" class="hidden text-center text-sm"></p>
+    </div>
+</form>
+
+<script>
+    import { browserName } from '../lib/browser'
+
+    for (const form of document.querySelectorAll<HTMLFormElement>('[data-uninstall-form]')) {
+        const message = form.querySelector<HTMLParagraphElement>('[data-form-message]')!
+        const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!
+        const say = (text: string, ok: boolean) => {
+            message.textContent = text
+            message.className = `text-center text-sm ${ok ? 'text-host' : 'text-[#f15e6c]'}`
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault()
+            const data = new FormData(form)
+            const usedFor = data.getAll('usedFor')
+            const reason = data.get('reason') ?? ''
+            const details = String(data.get('details') ?? '').trim()
+            if (!reason && !details && usedFor.length === 0) {
+                say('Pick a reason or tell us a little, so there is something to send.', false)
+                return
+            }
+
+            // The extension can add ?version= (and ?browser=) to its uninstall URL.
+            const params = new URLSearchParams(location.search)
+            button.disabled = true
+            button.textContent = 'Sending…'
+            try {
+                const response = await fetch('/api/uninstall-feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        host: form.dataset.host,
+                        version: params.get('version') ?? '',
+                        browser: params.get('browser') ?? browserName(),
+                        usedFor,
+                        reason,
+                        plan: data.get('plan') ?? '',
+                        details,
+                        replyEmail: data.get('replyEmail') ?? '',
+                        honeypot: data.get('website') ?? ''
+                    })
+                })
+                const result = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null
+                if (response.ok && result?.ok) {
+                    say('Thank you. It went straight to the Chorus inbox.', true)
+                    button.textContent = 'Sent'
+                    return
+                }
+                say(result?.error ?? 'Something went wrong sending your feedback. Please try again.', false)
+            } catch {
+                say("Couldn't reach the feedback service. Please try again.", false)
+            }
+            button.disabled = false
+            button.textContent = 'Send feedback'
+        })
+    }
+</script>

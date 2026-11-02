@@ -1,0 +1,117 @@
+---
+import Landing from '../../layouts/Landing.astro'
+import { LINKS, YOUTUBE_EARLY_ACCESS } from '../../lib/site'
+
+const steps = [
+    {
+        title: 'Pin Chorus',
+        body: 'Pin it from the extensions menu. The popup has the player controls, the sleep timer, vocal separation and an on/off switch.'
+    },
+    {
+        title: 'Open the rack',
+        body: 'Play a video and find the Chorus button in the player controls. Speed, presets, effects and snips live there.'
+    },
+    {
+        title: 'Make your first snip',
+        body: 'Mark the part of a song you replay most. It shows on the seek bar and plays on its own from then on.'
+    }
+]
+
+const card = 'reveal flex flex-col gap-3 rounded-[22px] border border-white/8 bg-[#121212] p-7'
+---
+
+<Landing
+    title="Welcome to Chorus for YouTube"
+    description="Chorus for YouTube is installed. Here's how to get started."
+    host="youtube"
+>
+    <section class="relative px-6 pt-16 pb-24">
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0 -top-30 overflow-hidden">
+            <div class="absolute top-10 left-[12%] size-130 animate-[drift-a_16s_ease-in-out_infinite] rounded-full bg-host opacity-14 blur-[110px]"></div>
+            <div class="absolute top-40 right-[8%] size-105 animate-[drift-b_19s_ease-in-out_infinite] rounded-full bg-[#ffa42b] opacity-8 blur-[110px]"></div>
+        </div>
+
+        <div class="relative mx-auto flex max-w-245 flex-col gap-14">
+            <header class="flex max-w-170 flex-col gap-5">
+                <span class="inline-flex items-center gap-2.5 self-start rounded-full border border-white/10 bg-white/6 px-3.5 py-1.75 font-code text-xs tracking-[0.16em] text-[#dcdcdc]">
+                    <span class="size-2 rounded-full bg-host shadow-[0_0_10px_var(--host)]"></span>INSTALLED · CHORUS FOR YOUTUBE
+                </span>
+                <h1 class="m-0 font-display text-[clamp(44px,7vw,80px)] leading-[0.96] font-bold tracking-[-0.035em]">
+                    You're set. Open any video.
+                </h1>
+                <p class="m-0 max-w-130 text-lg leading-relaxed text-[#b3b3b3]">
+                    Chorus runs on youtube.com and YouTube Music. Three things to try first:
+                </p>
+            </header>
+
+            <ol class="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4 p-0">
+                {
+                    steps.map((step, i) => (
+                        <li class={card}>
+                            <span class="font-code text-xs text-host">0{i + 1}</span>
+                            <h2 class="m-0 font-display text-2xl font-bold tracking-[-0.02em]">{step.title}</h2>
+                            <p class="m-0 text-[15px] leading-relaxed text-[#b3b3b3]">{step.body}</p>
+                        </li>
+                    ))
+                }
+            </ol>
+
+            <div class="flex flex-wrap gap-3">
+                <a
+                    href="https://www.youtube.com"
+                    class="inline-flex min-h-13 items-center rounded-xl bg-host-strong px-6 font-semibold text-host-ink shadow-[0_12px_40px_color-mix(in_srgb,var(--host)_35%,transparent)]"
+                >
+                    Open YouTube
+                </a>
+                <a href="https://music.youtube.com" class="inline-flex min-h-13 items-center rounded-xl border border-white/12 bg-white/6 px-5 font-semibold">
+                    Open YouTube Music
+                </a>
+                <a href="/?host=youtube#showcase" class="inline-flex min-h-13 items-center rounded-xl border border-white/12 bg-white/6 px-5 font-semibold">
+                    See everything it does
+                </a>
+            </div>
+
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-4">
+                <section class={card}>
+                    <span class="flex items-center gap-2 font-code text-[11px] tracking-[0.18em] text-[#8a8a8a]">
+                        <span class="size-2 rounded-full bg-[#1ed760]"></span>ALSO ON SPOTIFY?
+                    </span>
+                    <h2 class="m-0 font-display text-2xl font-bold tracking-[-0.02em]">Chorus for Spotify has the same rack.</h2>
+                    <p class="m-0 text-[15px] leading-relaxed text-[#b3b3b3]">
+                        Snips, blocks, presets, speed and effects on open.spotify.com. A separate extension with the same controls.
+                    </p>
+                    <a
+                        href={LINKS.chrome}
+                        data-store-link
+                        data-firefox-href={LINKS.firefox}
+                        data-firefox-label="Get Chorus for Spotify"
+                        class="mt-2 inline-flex min-h-11 items-center self-start rounded-xl bg-[#1ed760] px-5 text-sm font-semibold text-[#0b0b0b]"
+                    >
+                        <span data-store-label>Get Chorus for Spotify</span>
+                    </a>
+                </section>
+                <section class={card}>
+                    <span class="font-code text-[11px] tracking-[0.18em] text-host">EARLY ACCESS</span>
+                    <h2 class="m-0 font-display text-2xl font-bold tracking-[-0.02em]">Found a rough edge?</h2>
+                    <p class="m-0 text-[15px] leading-relaxed text-[#b3b3b3]">
+                        This is an early build. Tell us in the Discord and it's likely fixed in the next one.
+                    </p>
+                    <a
+                        href={YOUTUBE_EARLY_ACCESS}
+                        class="mt-2 inline-flex min-h-11 items-center self-start rounded-xl border border-white/14 bg-white/8 px-5 text-sm font-semibold"
+                    >
+                        Join the Discord
+                    </a>
+                    <a href="/support/?host=youtube" class="text-sm text-[#b3b3b3] underline-offset-4 hover:text-white hover:underline">
+                        Or write to support
+                    </a>
+                </section>
+            </div>
+
+            <p class="m-0 max-w-170 text-sm leading-relaxed text-[#7f7f7f]">
+                During ads, Chorus steps aside: no snips, skips or speed changes until the video starts. It never hides, mutes or
+                skips an ad.
+            </p>
+        </div>
+    </section>
+</Landing>

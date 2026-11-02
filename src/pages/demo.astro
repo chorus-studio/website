@@ -1,0 +1,54 @@
+---
+import Landing from '../layouts/Landing.astro'
+import AudioDemo from '../components/demo/AudioDemo.svelte'
+---
+
+<Landing title="Interactive Demo | Chorus" description="Try Chorus audio features live in your browser. No installation required.">
+    <section class="px-6 py-24">
+        <div class="mx-auto max-w-3xl">
+            <div class="mb-12 text-center">
+                <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-[#1db954]/30 bg-[#1db954]/10 px-4 py-1.5 text-sm text-[#1db954]">
+                    <span>Interactive</span>
+                    <span class="text-[#1db954]/50">|</span>
+                    <span>Web Audio API</span>
+                </div>
+                <h1 class="mb-4 text-4xl font-bold md:text-5xl">
+                    Try Chorus <span class="text-[#1db954]">Live</span>
+                </h1>
+                <p class="mx-auto max-w-2xl text-[#b3b3b3]">
+                    Experience the same audio processing from the Chorus extension — equalizer, reverb,
+                    mid-side processor, speed control, snips, and seeking — all running in your browser
+                    with the actual AudioWorklet processors.
+                </p>
+            </div>
+
+            <AudioDemo client:load />
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="px-6 pb-24">
+        <div class="mx-auto max-w-3xl rounded-2xl border border-white/5 bg-gradient-to-br from-[#1db954]/10 to-transparent p-12 text-center">
+            <h2 class="mb-4 text-2xl font-bold">Like what you hear?</h2>
+            <p class="mb-8 text-[#b3b3b3]">
+                Get these features and more on Spotify with the Chorus extension. Free and open source.
+            </p>
+            <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <a
+                    href="https://chromewebstore.google.com/detail/chorus-spotify-enhancer/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="rounded-full bg-[#1db954] px-8 py-3 font-semibold text-black transition hover:bg-[#1aa34a]"
+                >
+                    Install Chorus Free
+                </a>
+                <a
+                    href="/getting-started/installation/"
+                    class="rounded-full border border-white/20 px-8 py-3 font-semibold transition hover:bg-white/10"
+                >
+                    Read the Docs
+                </a>
+            </div>
+        </div>
+    </section>
+</Landing>

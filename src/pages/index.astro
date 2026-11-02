@@ -1,188 +1,266 @@
 ---
 import Landing from '../layouts/Landing.astro'
+import HostSwitch from '../components/home/HostSwitch.svelte'
+import HostVideo from '../components/home/HostVideo.svelte'
+import Marquee from '../components/home/Marquee.astro'
+import Showcase from '../components/home/Showcase.svelte'
+import PresetsDemo from '../components/home/PresetsDemo.svelte'
+import Bento from '../components/home/Bento.astro'
+import Anywhere from '../components/home/Anywhere.svelte'
+import Looks from '../components/home/Looks.svelte'
+import Tour from '../components/home/Tour.svelte'
+import { LINKS, YOUTUBE_EARLY_ACCESS } from '../lib/site'
 
-const features = [
-    {
-        title: 'Snips',
-        description:
-            'Save your favorite section of any track — chorus, verse, bridge — and loop it forever. Share snips with friends via a link.',
-        icon: 'scissors'
-    },
-    {
-        title: 'Auto-Skip & Block',
-        description:
-            'Block tracks you never want to hear again. Works across albums, playlists, artist pages, search, and queue.',
-        icon: 'ban'
-    },
-    {
-        title: 'Playback Speed',
-        description:
-            'Set global or per-track playback speed. Toggle pitch correction to switch between low and high pitch vocals.',
-        icon: 'gauge'
-    },
-    {
-        title: 'Equalizer',
-        description:
-            'Fine-tune your sound with built-in Spotify presets or create your own custom EQ profiles.',
-        icon: 'sliders-horizontal'
-    },
-    {
-        title: 'Reverb',
-        description:
-            'Add room reverb effects with impulse responses. Choose from presets or dial in your own settings.',
-        icon: 'waves'
-    },
-    {
-        title: 'Mid-Side Processor',
-        description:
-            'Advanced stereo effects with multi-effect support. Shape the stereo image of any track in real time.',
-        icon: 'audio-lines'
-    },
-    {
-        title: 'Seeking Controls',
-        description:
-            'Fast-forward and rewind with customizable seek durations. Works with music, podcasts, and audiobooks.',
-        icon: 'fast-forward'
-    },
-    {
-        title: 'Keyboard Shortcuts',
-        description:
-            '20+ configurable keyboard commands for media control, snip management, presets, and theme switching.',
-        icon: 'keyboard'
-    },
-    {
-        title: 'Theming',
-        description:
-            'Multiple themes with vibrant color extraction from album artwork. Dynamic colors that follow your music.',
-        icon: 'palette'
-    }
+const spotifyBrowsers = ['Chrome', 'Firefox', 'Edge', 'Opera', 'Brave', 'Vivaldi']
+const youtubeBrowsers = ['Chrome', 'Firefox']
+
+// [label, which host has it]
+const more: [string, 'both' | 'spotify' | 'youtube'][] = [
+    ['Snips library', 'both'],
+    ['Stereo width', 'both'],
+    ['Texture', 'both'],
+    ['Custom seek steps', 'both'],
+    ['Keyboard shortcuts', 'both'],
+    ['One-key snip marking', 'both'],
+    ['Backup and restore', 'both'],
+    ['One-key on / off', 'both'],
+    ['Snip from the lyrics', 'spotify'],
+    ['Discographies', 'spotify'],
+    ['New releases', 'spotify'],
+    ['Per-track volume', 'spotify'],
+    ['Share a look as a file', 'spotify'],
+    ['Block a channel', 'youtube'],
+    ['Block from any card', 'youtube'],
+    ['YouTube Music', 'youtube']
 ]
 
-const iconPaths: Record<string, string> = {
-    scissors:
-        'M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6m0 0l5.12 5.12M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6m0 0l5.12-5.12m3.76 3.76L18 18m-1.12-7.12L18 6',
-    ban: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10m-5.66-4.34L16.66 7.34',
-    gauge: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6m0 0V3m-9 9a9 9 0 1 0 18 0 9 9 0 0 0-18 0',
-    'sliders-horizontal':
-        'M21 4h-7m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H3m18 8h-3m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H3m18 8h-7m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H3',
-    waves: 'M2 12c.6-.5 1.2-1 2.5-1s2.5 1.5 4 1.5 2.5-1.5 4-1.5 2.5 1.5 4 1.5 2.5-1 3.5-1.5m-18-4c.6-.5 1.2-1 2.5-1s2.5 1.5 4 1.5 2.5-1.5 4-1.5 2.5 1.5 4 1.5 2.5-1 3.5-1.5m-18 8c.6-.5 1.2-1 2.5-1s2.5 1.5 4 1.5 2.5-1.5 4-1.5 2.5 1.5 4 1.5 2.5-1 3.5-1.5',
-    'audio-lines':
-        'M2 10v4m4-8v12m4-16v20m4-16v12m4-8v4',
-    'fast-forward': 'M13 19V5l7 7-7 7M4 19V5l7 7-7 7',
-    keyboard:
-        'M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6m4 2h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8',
-    palette:
-        'M12 2a10 10 0 0 0 0 20c.73 0 1.4-.47 1.63-1.17a1.74 1.74 0 0 0-1.31-2.33H11a3 3 0 0 1 0-6h1.5a1.5 1.5 0 0 0 0-3H11a5 5 0 0 1 0-10h1'
-}
+const faqs = [
+    ['Is Chorus free?', 'Yes. Both extensions are free and open source under the MIT license.'],
+    ['Is my audio uploaded anywhere?', 'No. Effects and vocal separation run in your browser tab. Nothing is sent to a server.'],
+    [
+        'Does Chorus touch YouTube ads?',
+        'No. During an ad Chorus steps aside: no snips, skips or speed changes until the video starts. It never hides, mutes or skips ads.'
+    ],
+    [
+        'Which browsers?',
+        'Chorus for Spotify: Chrome, Firefox, Edge, Opera, Brave and Vivaldi. Chorus for YouTube: Chrome and Firefox.'
+    ],
+    [
+        'Does picture-in-picture work everywhere?',
+        'It needs a Chromium browser such as Chrome or Edge. Firefox has no document picture-in-picture yet, so there the toolbar popup is the way to control Chorus from another tab.'
+    ]
+]
+
+const floatChip =
+    'absolute z-3 hidden items-center gap-2.5 rounded-xl border border-white/12 bg-[#161616]/92 px-3.5 py-2.5 text-[13px] shadow-[0_18px_40px_rgba(0,0,0,0.55)] md:inline-flex'
 ---
 
-<Landing title="Chorus - Spotify Enhancer">
-    <!-- Hero -->
-    <section class="relative overflow-hidden px-6 py-24 text-center md:py-36">
-        <div class="absolute inset-0 bg-gradient-to-b from-[#1db954]/10 via-transparent to-transparent"></div>
-        <div class="relative mx-auto max-w-4xl">
-            <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-[#1db954]/30 bg-[#1db954]/10 px-4 py-1.5 text-sm text-[#1db954]">
-                <span>v2.8.3</span>
-                <span class="text-[#1db954]/50">|</span>
-                <span>Open Source</span>
-            </div>
-            <h1 class="mb-6 text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-                Enhance Your<br />
-                <span class="text-[#1db954]">Spotify</span> Experience
-            </h1>
-            <p class="mx-auto mb-10 max-w-2xl text-lg text-[#b3b3b3] md:text-xl">
-                Save favorite track sections, auto-skip songs, control playback speed, and add
-                professional audio effects — all from your browser.
-            </p>
-            <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a
-                    href="https://chromewebstore.google.com/detail/chorus-spotify-enhancer/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex items-center gap-2 rounded-full bg-[#1db954] px-8 py-3.5 font-semibold text-black transition hover:bg-[#1aa34a]"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
-                    Install for Chrome
-                </a>
-                <a
-                    href="https://addons.mozilla.org/firefox/addon/chorus-spotify-enhancer/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex items-center gap-2 rounded-full border border-white/20 px-8 py-3.5 font-semibold transition hover:bg-white/10"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                    Install for Firefox
-                </a>
-            </div>
-            <p class="mt-6 text-sm text-[#b3b3b3]">
-                Also works on Edge, Opera, Brave, and Vivaldi
-            </p>
+<Landing title="Chorus · A studio rack for Spotify and YouTube">
+    <header class="relative px-6 pt-16 pb-24">
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0 -top-30 overflow-hidden">
+            <div class="absolute top-10 left-[8%] size-130 animate-[drift-a_16s_ease-in-out_infinite] rounded-full bg-host opacity-16 blur-[110px]"></div>
+            <div class="absolute top-30 right-[6%] size-115 animate-[drift-b_19s_ease-in-out_infinite] rounded-full bg-[#ffa42b] opacity-9 blur-[110px]"></div>
+            <div class="absolute top-90 left-[40%] size-105 animate-[drift-c_14s_ease-in-out_infinite] rounded-full bg-[#1b6b63] opacity-22 blur-[110px]"></div>
         </div>
-    </section>
 
-    <!-- Features -->
-    <section class="px-6 py-20">
-        <div class="mx-auto max-w-6xl">
-            <div class="mb-16 text-center">
-                <h2 class="mb-4 text-3xl font-bold md:text-4xl">Everything Spotify is Missing</h2>
-                <p class="mx-auto max-w-2xl text-[#b3b3b3]">
-                    Professional-grade audio controls and track management features that transform
-                    the Spotify web player.
+        <div class="relative mx-auto flex max-w-290 flex-wrap items-center gap-14">
+            <div class="flex min-w-0 flex-[1_1_440px] flex-col gap-6">
+                <span class="inline-flex items-center gap-2 self-start rounded-full border border-white/10 bg-white/6 px-3.5 py-1.75 text-[13px] text-[#dcdcdc]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--host)" aria-hidden="true" class="animate-[sparkle_3s_ease-in-out_infinite]"><path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z"></path></svg>
+                    Free · open source · MIT
+                </span>
+                <h1 class="m-0 bg-[linear-gradient(180deg,#ffffff_30%,#9a9a9a)] bg-clip-text font-display text-[clamp(46px,6.2vw,78px)] leading-[0.97] font-bold tracking-[-0.035em] text-transparent">
+                    Your player, with a studio rack.
+                </h1>
+                <p class="m-0 max-w-125 text-lg leading-relaxed text-[#b3b3b3]">
+                    Loop the chorus, skip the skits, slow a solo without the chipmunk effect, and put it all in a concert hall.
+                    Inside the player you already use.
+                </p>
+                <HostSwitch client:load />
+                <div class="flex flex-wrap gap-3">
+                    <a
+                        href={LINKS.chrome}
+                        data-store-link
+                        data-firefox-href={LINKS.firefox}
+                        data-firefox-label="Add to Firefox, free"
+                        class="inline-flex min-h-13 items-center gap-2.5 rounded-xl bg-host-strong px-6 text-base font-semibold text-host-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1),0_12px_40px_color-mix(in_srgb,var(--host)_35%,transparent)] yt:hidden"
+                    >
+                        <span data-store-label>Add to Chrome, free</span>
+                    </a>
+                    <a
+                        href={YOUTUBE_EARLY_ACCESS}
+                        class="hidden min-h-13 items-center gap-2.5 rounded-xl bg-host-strong px-6 text-base font-semibold text-host-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1),0_12px_40px_color-mix(in_srgb,var(--host)_38%,transparent)] yt:inline-flex"
+                    >
+                        Get early access
+                    </a>
+                    <a
+                        href="#tour"
+                        class="inline-flex min-h-13 items-center gap-2.5 rounded-xl border border-white/12 bg-white/6 px-5 text-base font-semibold"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"></path></svg>
+                        Watch 0:50 tour
+                    </a>
+                </div>
+                <div class="flex flex-wrap items-center gap-x-4.5 gap-y-2 text-[13px]">
+                    <span class="font-code text-[11px] tracking-[0.15em] text-[#7f7f7f]">RUNS IN</span>
+                    {spotifyBrowsers.map((name) => <span class="font-medium text-[#b3b3b3] yt:hidden">{name}</span>)}
+                    {youtubeBrowsers.map((name) => <span class="hidden font-medium text-[#b3b3b3] yt:inline">{name}</span>)}
+                </div>
+            </div>
+
+            <div class="relative min-w-0 flex-[1.15_1_500px]">
+                <div class:list={[floatChip, '-bottom-5 -left-7 animate-[float_5s_ease-in-out_infinite]']}>
+                    <span class="font-code text-host">looped ×3</span><span class="text-[#8a8a8a]">1:07 → 2:06</span>
+                </div>
+                <div class:list={[floatChip, '-top-4.5 -right-5.5 animate-[float_6s_ease-in-out_-2s_infinite]']}>
+                    <span class="size-2 rounded-full bg-host shadow-[0_0_10px_var(--host)]"></span>Saved for this track
+                </div>
+                <div
+                    class="animate-[beam_5s_linear_infinite] rounded-[20px] p-px shadow-[0_50px_120px_rgba(0,0,0,0.6),0_0_80px_color-mix(in_srgb,var(--host)_16%,transparent)]"
+                    style="background: conic-gradient(from var(--beam), rgba(255,255,255,0.1) 0deg, rgba(255,255,255,0.1) 240deg, var(--host) 315deg, #ffffff 330deg, rgba(255,255,255,0.1) 360deg)"
+                >
+                    <div class="overflow-hidden rounded-[19px] bg-[#0b0b0b]">
+                        <HostVideo
+                            client:load
+                            sources={{ spotify: '/media/snip.mp4', youtube: '/media/snip-yt.mp4' }}
+                            label="The Chorus snip editor, recorded"
+                            class="block h-auto w-full"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <Marquee />
+    <Showcase client:visible />
+    <PresetsDemo client:visible />
+    <Bento />
+    <Anywhere client:visible />
+    <Looks client:visible />
+
+    <section class="mx-auto max-w-290 px-6 pt-6 pb-24">
+        <div class="reveal relative flex flex-col gap-7 overflow-hidden rounded-[26px] border border-white/8 bg-[#111] p-[clamp(28px,4vw,48px)]">
+            <div
+                aria-hidden="true"
+                class="absolute -bottom-65 left-1/2 -ml-112.5 h-105 w-225 rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--host)_16%,transparent),transparent)]"
+            >
+            </div>
+            <div class="relative flex flex-wrap items-end justify-between gap-4">
+                <div class="flex max-w-140 flex-col gap-3">
+                    <span class="font-code text-xs tracking-[0.2em] text-host">
+                        <span class="yt:hidden">LIVES INSIDE SPOTIFY</span><span class="hidden yt:inline">LIVES INSIDE YOUTUBE</span>
+                    </span>
+                    <h2 class="m-0 font-display text-[clamp(30px,3.8vw,46px)] leading-[1.02] font-bold tracking-[-0.03em]">
+                        <span class="yt:hidden">No new app. No new tab.</span><span class="hidden yt:inline">In the player you already use.</span>
+                    </h2>
+                </div>
+                <p class="m-0 max-w-95 text-base leading-relaxed text-[#b3b3b3]">
+                    <span class="yt:hidden">Controls graft into the player bar: snip, block, speed, and a Chorus volume that goes past 100%.</span>
+                    <span class="hidden yt:inline">Chorus buttons sit in the video controls, and your snips show up as marks on the seek bar.</span>
                 </p>
             </div>
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {
-                    features.map((feature) => (
-                        <div class="group rounded-xl border border-white/5 bg-[#181818] p-6 transition hover:border-[#1db954]/30 hover:bg-[#1a1a1a]">
-                            <div class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[#1db954]/10">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="#1db954"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                >
-                                    <path d={iconPaths[feature.icon]} />
-                                </svg>
-                            </div>
-                            <h3 class="mb-2 text-lg font-semibold">{feature.title}</h3>
-                            <p class="text-sm leading-relaxed text-[#b3b3b3]">
-                                {feature.description}
-                            </p>
-                        </div>
-                    ))
-                }
+            <div class="relative overflow-hidden rounded-[14px] border border-white/10 bg-[#0b0b0b]">
+                <video
+                    src="/media/player-bar.mp4"
+                    autoplay
+                    loop
+                    muted
+                    playsinline
+                    aria-label="Chorus controls in the Spotify player bar, recorded"
+                    class="block h-auto w-full yt:hidden"
+                ></video>
+                <div class="hidden flex-wrap items-center gap-x-5.5 gap-y-4 bg-[#141414] px-5 py-4.5 yt:flex">
+                    <div class="relative h-1 flex-[1_1_100%] rounded-sm bg-white/25">
+                        <div class="absolute inset-y-0 left-0 w-[30%] bg-[#ff0033]"></div>
+                        <div class="absolute -inset-y-0.75 left-[30%] w-[26%] rounded-[3px] border-x-2 border-[#ff0033] bg-[#ff0033]/30"></div>
+                    </div>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg>
+                    <span class="font-code text-xs text-[#dcdcdc]">1:24 / 4:03</span>
+                    <span class="ml-auto inline-flex gap-3.5 rounded-full bg-[#ff0033]/14 px-3 py-1.5 text-[#ff4d6d]">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"></path></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>
+                    </span>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- CTA -->
-    <section class="px-6 py-20">
-        <div class="mx-auto max-w-3xl rounded-2xl border border-white/5 bg-gradient-to-br from-[#1db954]/10 to-transparent p-12 text-center">
-            <h2 class="mb-4 text-3xl font-bold">Ready to enhance Spotify?</h2>
-            <p class="mb-8 text-[#b3b3b3]">
-                Free, open source, and available for all Chromium browsers and Firefox.
+    <Tour client:visible />
+
+    <section class="mx-auto flex max-w-290 flex-col items-center gap-9 px-6 pt-6 pb-24">
+        <h2 class="reveal m-0 font-display text-[clamp(44px,7vw,88px)] leading-none font-bold tracking-[-0.04em]">And more.</h2>
+        <div class="flex max-w-240 flex-wrap justify-center gap-3">
+            {
+                more.map(([label, where], i) => (
+                    <span
+                        class:list={[
+                            'popin items-center gap-2.5 rounded-full border border-white/9 bg-[#141414] px-5 py-3.5 text-base font-medium',
+                            where === 'both' && 'inline-flex',
+                            where === 'spotify' && 'inline-flex yt:hidden',
+                            where === 'youtube' && 'hidden yt:inline-flex'
+                        ]}
+                        style={`animation-range: entry ${(i % 4) * 6}% cover ${30 + (i % 4) * 6}%`}
+                    >
+                        <span class="size-2 rotate-45 rounded-[2px] bg-host" />
+                        {label}
+                    </span>
+                ))
+            }
+        </div>
+    </section>
+
+    <section id="faq" class="mx-auto flex max-w-205 scroll-mt-24 flex-col gap-6 px-6 pt-6 pb-24">
+        <h2 class="reveal m-0 text-center font-display text-[clamp(32px,4vw,48px)] font-bold tracking-[-0.03em]">Questions</h2>
+        <div class="flex flex-col gap-2.5">
+            {
+                faqs.map(([question, answer], i) => (
+                    <details class="group reveal overflow-hidden rounded-2xl border border-white/8 bg-[#121212]" open={i === 0}>
+                        <summary class="flex min-h-15 cursor-pointer list-none items-center justify-between gap-4 px-5.5 text-[17px] font-semibold [&::-webkit-details-marker]:hidden">
+                            {question}
+                            <span class="inline-flex text-host transition-transform duration-300 group-open:rotate-45">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                                    <path d="M12 5v14M5 12h14" />
+                                </svg>
+                            </span>
+                        </summary>
+                        <p class="m-0 px-5.5 pb-5 text-[15px] leading-relaxed text-[#b3b3b3]">{answer}</p>
+                    </details>
+                ))
+            }
+        </div>
+        <p class="m-0 text-center text-[15px] text-[#8a8a8a]">
+            Still stuck? <a href="/support/" class="text-host hover:underline">Contact support</a> or ask on the
+            <a href={LINKS.discord} class="text-host hover:underline">Discord</a>.
+        </p>
+    </section>
+
+    <section class="mx-auto max-w-290 px-6 pb-24">
+        <div class="reveal relative flex flex-col items-center gap-5.5 overflow-hidden rounded-[28px] border border-white/8 bg-[#111] px-6 py-[clamp(40px,6vw,80px)] text-center">
+            <div aria-hidden="true" class="absolute -top-30 left-[20%] size-95 animate-[drift-a_14s_ease-in-out_infinite] rounded-full bg-host opacity-18 blur-[90px]"></div>
+            <div aria-hidden="true" class="absolute right-[15%] -bottom-40 size-95 animate-[drift-b_16s_ease-in-out_infinite] rounded-full bg-[#5865f2] opacity-20 blur-[90px]"></div>
+            <h2 class="relative m-0 font-display text-[clamp(34px,5vw,60px)] leading-none font-bold tracking-[-0.035em]">Pick your player. Join the crew.</h2>
+            <p class="relative m-0 max-w-130 text-[17px] leading-relaxed text-[#b3b3b3]">
+                One Discord for both extensions: presets, bugs, requests and early YouTube builds.
             </p>
-            <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a
-                    href="https://chromewebstore.google.com/detail/chorus-spotify-enhancer/jfnjmnapkhdbaidedlbdcmhiphfjljcd"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="rounded-full bg-[#1db954] px-8 py-3 font-semibold text-black transition hover:bg-[#1aa34a]"
-                >
-                    Get Chorus Free
+            <div class="relative flex flex-wrap justify-center gap-3">
+                <a href={LINKS.chrome} data-store-link data-firefox-href={LINKS.firefox} data-firefox-label="Chorus for Spotify" class="inline-flex min-h-12.5 items-center rounded-xl bg-[#1ed760] px-5 font-semibold text-[#0b0b0b]">
+                    <span data-store-label>Chorus for Spotify</span>
                 </a>
-                <a
-                    href="/getting-started/installation/"
-                    class="rounded-full border border-white/20 px-8 py-3 font-semibold transition hover:bg-white/10"
-                >
-                    Read the Docs
-                </a>
+                <a href={YOUTUBE_EARLY_ACCESS} class="inline-flex min-h-12.5 items-center rounded-xl bg-[#e0002d] px-5 font-semibold text-white">Chorus for YouTube</a>
+                <a href={LINKS.discord} class="inline-flex min-h-12.5 items-center rounded-xl border border-white/14 bg-white/8 px-5 font-semibold">Discord</a>
             </div>
         </div>
     </section>
+
+    <script is:inline>
+        // Static clips follow the reduced-motion preference too; the islands handle their own.
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            for (const video of document.querySelectorAll('video[autoplay]')) {
+                video.removeAttribute('autoplay')
+                video.pause()
+            }
+        }
+    </script>
 </Landing>

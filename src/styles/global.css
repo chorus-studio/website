@@ -1,5 +1,23 @@
 @import 'tailwindcss';
 
+/* Show something on one host only: `yt:hidden` hides it on YouTube, `hidden yt:block` shows it
+   only there. The host lives on <html data-host>, set before paint by Landing.astro. */
+@custom-variant yt (&:where([data-host='youtube'], [data-host='youtube'] *));
+@custom-variant sp (&:where(:root:not([data-host='youtube']), :root:not([data-host='youtube']) *));
+
+@theme {
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-code: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* The host's signal colour, the same token the extensions tint themselves with. */
+@theme inline {
+    --color-host: var(--host);
+    --color-host-strong: var(--host-strong);
+    --color-host-ink: var(--host-ink);
+}
+
 :root {
     --chorus-green: #1db954;
     --chorus-green-dark: #1aa34a;
@@ -7,6 +25,16 @@
     --chorus-card: #181818;
     --chorus-text: #ffffff;
     --chorus-subtext: #b3b3b3;
+
+    --host: #1ed760;
+    --host-strong: #1ed760;
+    --host-ink: #0b0b0b;
+}
+
+:root[data-host='youtube'] {
+    --host: #ff0033;
+    --host-strong: #e0002d;
+    --host-ink: #ffffff;
 }
 
 /* Override Starlight theme colors for Chorus branding */
@@ -20,4 +48,221 @@
     --sl-color-accent-low: #c8f5d8;
     --sl-color-accent: #0f7b35;
     --sl-color-accent-high: #093d1a;
+}
+
+/* Landing pages: motion shared by the home sections. */
+@property --beam {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+
+@property --p {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 100;
+}
+
+@keyframes beam {
+    to {
+        --beam: 360deg;
+    }
+}
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+}
+@keyframes drift-a {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(80px, 40px) scale(1.15);
+    }
+}
+@keyframes drift-b {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1.1);
+    }
+    50% {
+        transform: translate(-90px, 30px) scale(0.9);
+    }
+}
+@keyframes drift-c {
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(40px, -60px);
+    }
+}
+@keyframes fill {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+@keyframes enter {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(32px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+@keyframes pop {
+    from {
+        opacity: 0;
+        transform: scale(0.6) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+@keyframes pulse-ring {
+    0% {
+        box-shadow: 0 0 0 0 var(--pc);
+    }
+    100% {
+        box-shadow: 0 0 0 22px transparent;
+    }
+}
+@keyframes sparkle {
+    0%,
+    100% {
+        transform: rotate(0) scale(1);
+    }
+    50% {
+        transform: rotate(90deg) scale(1.2);
+    }
+}
+@keyframes marquee {
+    to {
+        transform: translateX(-50%);
+    }
+}
+@keyframes eq {
+    0%,
+    100% {
+        transform: scaleY(0.3);
+    }
+    50% {
+        transform: scaleY(1);
+    }
+}
+@keyframes ring {
+    from {
+        transform: scale(0.3);
+        opacity: 0.9;
+    }
+    to {
+        transform: scale(1.15);
+        opacity: 0;
+    }
+}
+@keyframes knob {
+    0%,
+    12% {
+        transform: translateY(0);
+    }
+    42%,
+    86% {
+        transform: translateY(var(--t));
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+@keyframes grow {
+    0%,
+    12% {
+        transform: scaleY(0);
+    }
+    42%,
+    86% {
+        transform: scaleY(1);
+    }
+    100% {
+        transform: scaleY(0);
+    }
+}
+@keyframes squeeze {
+    0%,
+    22% {
+        flex-grow: 5;
+    }
+    42%,
+    84% {
+        flex-grow: 1.2;
+    }
+    100% {
+        flex-grow: 5;
+    }
+}
+@keyframes drain {
+    from {
+        --p: 100;
+    }
+    to {
+        --p: 0;
+    }
+}
+@keyframes fade-out {
+    0%,
+    55% {
+        transform: scaleY(1);
+    }
+    90%,
+    100% {
+        transform: scaleY(var(--f));
+    }
+}
+
+.reveal,
+.popin {
+    animation: none;
+}
+
+@supports (animation-timeline: view()) {
+    .reveal {
+        animation: rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 26%;
+    }
+    .popin {
+        animation: pop linear both;
+        animation-timeline: view();
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .landing *,
+    .landing *::before,
+    .landing *::after {
+        animation: none !important;
+        transition: none !important;
+    }
 }

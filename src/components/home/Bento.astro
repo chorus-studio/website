@@ -1,0 +1,206 @@
+---
+// Live copies of rack panels, animated with CSS only and tinted by the host token.
+const seed = (i: number, k: number) => 25 + Math.round(Math.abs(Math.sin(i * k) * 65 + Math.sin(i * 0.31) * 10))
+
+// The Bass boost EQ preset: faders spring to these gains and back.
+const gains = [3.5, 3, 2, 1, 0, 0, 0, -1, -1.5, -2]
+const freqs = ['32', '64', '125', '250', '500', '1k', '2k', '4k', '8k', '16k']
+const bands = gains.map((db, i) => {
+    const px = Math.round(Math.abs(db) * 16)
+    return {
+        freq: freqs[i],
+        travel: -db * 16,
+        top: db >= 0 ? 80 - px : 80,
+        height: px,
+        origin: db >= 0 ? 'bottom' : 'top',
+        delay: `${(i * 0.06).toFixed(2)}s`
+    }
+})
+
+// A podcast waveform: bursts of speech with silences that squeeze up as they play at 2.5×.
+const speech: { gap: boolean; height: number; delay: string }[] = []
+;[9, 6, 11, 5, 8].forEach((count, group) => {
+    for (let k = 0; k < count; k++) speech.push({ gap: false, height: seed(group * 13 + k, 1.9), delay: '0s' })
+    if (group < 4) speech.push({ gap: true, height: 0, delay: `${(group * 0.15).toFixed(2)}s` })
+})
+
+// The track's last stretch: bars past the 24th ease down as the timer fades the volume.
+const fade = Array.from({ length: 36 }, (_, i) => {
+    const tail = Math.max(0, i - 24)
+    return { height: seed(i, 2.1), tail: tail > 0, scale: (1 - tail / 13).toFixed(2) }
+})
+
+const card = 'reveal relative flex min-w-0 flex-col overflow-hidden rounded-[22px] border border-white/8 bg-[#121212] p-7 transition-[translate] duration-200 hover:-translate-y-1'
+const eyebrow = 'font-code text-[11px] tracking-[0.18em] text-host'
+const title = 'm-0 font-display font-bold tracking-[-0.02em]'
+const panel = 'rounded-2xl border border-white/6 bg-[#0a0a0a]'
+---
+
+<section id="rack" class="mx-auto flex max-w-290 scroll-mt-24 flex-col gap-10 px-6 pt-24 pb-18">
+    <div class="reveal flex flex-wrap items-end justify-between gap-5">
+        <div class="flex max-w-155 flex-col gap-3.5">
+            <span class="font-code text-xs tracking-[0.2em] text-host">THE RACK, LIVE</span>
+            <h2 class="m-0 font-display text-[clamp(34px,4.6vw,56px)] leading-none font-bold tracking-[-0.03em]">Every control, live.</h2>
+        </div>
+        <p class="m-0 max-w-100 text-base leading-relaxed text-[#b3b3b3]">
+            Drawn from the extension's own panels, so they change colour with the player you pick.
+        </p>
+    </div>
+
+    <div class="flex flex-wrap gap-4">
+        <article class:list={[card, 'flex-[1.5_1_520px] gap-4.5']}>
+            <div class="flex flex-wrap items-end justify-between gap-2.5">
+                <div class="flex flex-col gap-2">
+                    <span class={eyebrow}>EQ</span>
+                    <h3 class:list={[title, 'text-[26px]']}>Ten bands. Your presets.</h3>
+                </div>
+                <span class="inline-flex items-center gap-2 text-[13px] text-[#b3b3b3]">
+                    <span class="size-1.75 rounded-full bg-host"></span>Preset <strong class="text-white">Bass boost</strong>
+                </span>
+            </div>
+            <div class:list={[panel, 'relative flex gap-1.5 px-3.5 pt-4.5 pb-3']}>
+                <div class="absolute inset-x-3.5 top-24.5 border-t border-dashed border-white/12"></div>
+                {
+                    bands.map((band) => (
+                        <div class="flex flex-1 flex-col items-center gap-2.5">
+                            <div class="relative h-40 w-full">
+                                <div class="absolute inset-y-0 left-1/2 -ml-px w-0.5 bg-[#1f1f1f]" />
+                                <div
+                                    class="absolute inset-x-[12%] animate-[grow_5s_cubic-bezier(.3,1.4,.5,1)_infinite] rounded-[3px] bg-host/35"
+                                    style={`top:${band.top}px;height:${band.height}px;transform-origin:${band.origin};animation-delay:${band.delay}`}
+                                />
+                                <div
+                                    class="absolute top-18 left-1/2 -ml-2 size-4 animate-[knob_5s_cubic-bezier(.3,1.4,.5,1)_infinite] rounded-full bg-white shadow-[0_0_0_3px_var(--host)]"
+                                    style={`--t:${band.travel}px;animation-delay:${band.delay}`}
+                                />
+                            </div>
+                            <span class="font-code text-[10px] text-[#8a8a8a]">{band.freq}</span>
+                        </div>
+                    ))
+                }
+            </div>
+        </article>
+
+        <article class:list={[card, 'flex-[1_1_320px] gap-4']}>
+            <span class={eyebrow}>REVERB</span>
+            <h3 class:list={[title, 'text-2xl']}>From studio to cathedral.</h3>
+            <div class:list={[panel, 'relative flex h-57.5 items-center justify-center overflow-hidden']}>
+                {
+                    [0, -0.8, -1.6, -2.4].map((delay) => (
+                        <span
+                            class="absolute size-55 animate-[ring_3.2s_ease-out_infinite] rounded-full border-[1.5px] border-host"
+                            style={`animation-delay:${delay}s`}
+                        />
+                    ))
+                }
+                <div class="relative flex flex-col items-center gap-2">
+                    <span class="font-code text-[10px] tracking-[0.2em] text-[#8a8a8a]">REVERB · ROOM</span>
+                    <span class="font-display text-[30px] font-bold">Concert hall</span>
+                    <span class="flex items-center gap-2 font-code text-[11px] text-[#8a8a8a]">
+                        decay
+                        <span class="h-0.75 w-22.5 rounded-sm bg-[#2a2a2a]"><span class="block h-0.75 w-[52%] rounded-sm bg-host"></span></span>
+                        <span class="text-white">2.1 s</span>
+                    </span>
+                </div>
+            </div>
+        </article>
+
+        <article class:list={[card, 'flex-[1_1_340px] gap-4']}>
+            <span class={eyebrow}>SMART SPEED</span>
+            <h3 class:list={[title, 'text-2xl']}>Rush the silences.</h3>
+            <div class:list={[panel, 'flex flex-col gap-3.5 p-4']}>
+                <div class="flex justify-between font-code text-[10px] tracking-[0.12em] text-[#8a8a8a]">
+                    <span>PODCAST · EP. 112</span><span class="text-host">GAPS AT 2.5×</span>
+                </div>
+                <div class="flex h-13.5 items-center gap-0.5" aria-hidden="true">
+                    {
+                        speech.map((bar) =>
+                            bar.gap ? (
+                                <span
+                                    class="h-0.5 flex-[5_1_0px] animate-[squeeze_5s_ease-in-out_infinite] bg-[repeating-linear-gradient(90deg,var(--host)_0_4px,transparent_4px_8px)]"
+                                    style={`animation-delay:${bar.delay}`}
+                                />
+                            ) : (
+                                <span class="w-0.75 shrink-0 rounded-[1px] bg-[#5c5c5c]" style={`height:${bar.height}%`} />
+                            )
+                        )
+                    }
+                </div>
+                <div class="flex items-center justify-between gap-3 rounded-[10px] border border-white/7 bg-[#151515] px-3 py-2.5">
+                    <span class="flex min-w-0 flex-col gap-0.5">
+                        <span class="text-[13px] font-semibold">Skip silences</span>
+                        <span class="text-[11px] text-[#8a8a8a]">Silences play 2.5× faster · 4:12 saved so far</span>
+                    </span>
+                    <span class="inline-flex h-5 w-8.5 shrink-0 justify-end rounded-full bg-host p-0.75"><span class="size-3.5 rounded-full bg-white"></span></span>
+                </div>
+                <span class="inline-flex self-start rounded-[9px] border border-white/8 bg-[#151515] p-0.75 text-xs">
+                    <span class="px-2.5 py-1.25 text-[#8a8a8a]">Music</span>
+                    <span class="rounded-md bg-[#2a2a2a] px-2.5 py-1.25">Podcasts &amp; audiobooks</span>
+                </span>
+            </div>
+        </article>
+
+        <article class:list={[card, 'flex-[1.5_1_520px] gap-4.5']}>
+            <div class="flex flex-wrap items-end justify-between gap-2.5">
+                <div class="flex flex-col gap-2">
+                    <span class={eyebrow}>SLEEP TIMER</span>
+                    <h3 class:list={[title, 'text-[26px]']}>Fall asleep to it. It fades out.</h3>
+                </div>
+                <span class="inline-flex items-center gap-1.75 rounded-full border border-white/8 bg-[#0a0a0a] px-2.75 py-1.5 font-code text-xs text-host">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+                    24m in the tray
+                </span>
+            </div>
+            <div class:list={[panel, 'flex flex-wrap items-center gap-5.5 p-5']}>
+                <div
+                    class="relative size-37.5 shrink-0 animate-[drain_30s_linear_infinite] rounded-full"
+                    style="background: conic-gradient(var(--host) calc(var(--p) * 1%), #222222 0)"
+                >
+                    <div class="absolute inset-1.75 flex flex-col items-center justify-center gap-1 rounded-full bg-[#0a0a0a]">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--host)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+                        <span class="font-code text-[26px]">24:12</span>
+                        <span class="text-[11px] text-[#8a8a8a]">left</span>
+                    </div>
+                </div>
+                <div class="flex min-w-0 flex-[1_1_240px] flex-col gap-2.5">
+                    <span class="font-code text-[10px] tracking-[0.15em] text-[#8a8a8a]">CHANGE TO</span>
+                    <div class="grid grid-cols-4 gap-1.5">
+                        {
+                            ['15', '30', '45', '60'].map((minutes) => (
+                                <span
+                                    class:list={[
+                                        'rounded-lg border py-2.25 text-center font-code text-[13px]',
+                                        minutes === '30' ? 'border-host bg-host/16 text-host' : 'border-white/8 bg-[#151515] text-[#dcdcdc]'
+                                    ]}
+                                >
+                                    {minutes}
+                                </span>
+                            ))
+                        }
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 text-[13px]">
+                        <span class="flex-auto rounded-lg border border-white/7 bg-[#151515] px-3 py-2.25">End of track</span>
+                        <span class="rounded-lg border border-white/7 bg-[#151515] px-3 py-2.25">Any length <span class="font-code text-[#8a8a8a]">90</span></span>
+                        <span class="rounded-lg border border-white/7 bg-[#151515] px-3 py-2.25">+15 min</span>
+                    </div>
+                    <div class="mt-1 flex flex-col gap-1.5">
+                        <span class="text-xs text-[#8a8a8a]">The volume eases down, then it pauses.</span>
+                        <div class="flex h-6.5 items-end gap-0.5" aria-hidden="true">
+                            {
+                                fade.map((bar) => (
+                                    <span
+                                        class:list={[
+                                            'flex-1 origin-bottom animate-[fade-out_6s_ease-in-out_infinite] rounded-[1px]',
+                                            bar.tail ? 'bg-[#4a4a4a]' : 'bg-host/35'
+                                        ]}
+                                        style={`height:${bar.height}%;--f:${bar.scale}`}
+                                    />
+                                ))
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</section>
