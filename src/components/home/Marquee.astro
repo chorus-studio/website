@@ -1,0 +1,50 @@
+---
+// Each entry is [Spotify label, YouTube label]; most read the same on both.
+const labels: [string, string][] = [
+    ['Snips', 'Snips'],
+    ['Presets', 'Presets'],
+    ['Auto-skip', 'Auto-skip'],
+    ['Block artists', 'Block channels'],
+    ['Speed', 'Speed'],
+    ['Keep pitch', 'Keep pitch'],
+    ['Key shift', 'Key shift'],
+    ['Smart speed', 'Smart speed'],
+    ['10-band EQ', '10-band EQ'],
+    ['Reverb rooms', 'Reverb rooms'],
+    ['Stereo width', 'Stereo width'],
+    ['Texture', 'Texture'],
+    ['Vocal separation', 'Vocal separation'],
+    ['Picture-in-picture', 'Picture-in-picture'],
+    ['Toolbar popup', 'Toolbar popup'],
+    ['Sleep timer', 'Sleep timer'],
+    ['Looks', 'Looks'],
+    ['Shortcuts', 'Shortcuts']
+]
+// Twice over, so the strip can slide by half its width and loop without a seam.
+const chips = [...labels, ...labels]
+---
+
+<section aria-label="Everything in the rack" class="pt-14 pb-6">
+    <div class="overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_12%,#000_88%,transparent)]">
+        <div class="flex w-max animate-[marquee_48s_linear_infinite] gap-3">
+            {
+                chips.map(([spotify, youtube], i) => (
+                    <span
+                        class="inline-flex items-center gap-2.5 rounded-full border border-white/8 bg-[#141414] px-4.5 py-3 text-[15px] whitespace-nowrap"
+                        aria-hidden={i >= labels.length ? 'true' : undefined}
+                    >
+                        <span class:list={['size-1.5 rounded-full', i % 3 === 0 ? 'bg-host' : 'bg-[#5a5a5a]']} />
+                        {spotify === youtube ? (
+                            spotify
+                        ) : (
+                            <>
+                                <span class="yt:hidden">{spotify}</span>
+                                <span class="hidden yt:inline">{youtube}</span>
+                            </>
+                        )}
+                    </span>
+                ))
+            }
+        </div>
+    </div>
+</section>
