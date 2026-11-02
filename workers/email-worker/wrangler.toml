@@ -1,0 +1,15 @@
+name = "chorus-email-worker"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+
+# Only the Pages project reaches it, through its EMAIL_WORKER service binding; no public URL.
+workers_dev = false
+preview_urls = false
+
+[[send_email]]
+name = "SEND_EMAIL"
+# No destination_address: it sends to the RECIPIENT secret, which must be a verified
+# Email Routing destination address on the account.
+
+[vars]
+SENDER = "support@chorusstudio.org"

@@ -1,7 +1,7 @@
 // Cloudflare Pages Function: POST /api/uninstall-feedback, from the /uninstall and
 // /youtube/uninstall forms. Pages serves it beside the static Astro build; the email goes out
-// through the EMAIL_WORKER service binding set on the Pages project in the Cloudflare dashboard
-// (the same email worker the LoveLofi site uses).
+// through the EMAIL_WORKER service binding, set on the Pages project in the Cloudflare dashboard
+// and pointing at the Chorus email worker in workers/email-worker.
 
 type EmailWorker = { fetch(input: RequestInfo, init?: RequestInit): Promise<Response> }
 
