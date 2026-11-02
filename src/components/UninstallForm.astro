@@ -1,0 +1,76 @@
+---
+interface Props {
+    /** Which extension was removed; sent with the feedback so the two can be told apart. */
+    host: 'spotify' | 'youtube'
+    reasons: string[]
+}
+
+const { host, reasons } = Astro.props
+---
+
+<form
+    data-uninstall-form
+    data-host={host}
+    class="flex flex-col gap-6 rounded-[22px] border border-white/8 bg-[#121212] p-[clamp(20px,4vw,32px)]"
+>
+    <fieldset class="flex flex-col gap-2.5">
+        <legend class="mb-3 text-[17px] font-semibold">Why did you uninstall Chorus?</legend>
+        {
+            reasons.map((reason) => (
+                <label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-white/8 bg-[#161616] px-4 transition-colors hover:border-white/20 has-[:checked]:border-host has-[:checked]:bg-host/8">
+                    <input type="radio" name="reason" value={reason} class="size-4 accent-host" />
+                    <span class="text-[15px]">{reason}</span>
+                </label>
+            ))
+        }
+    </fieldset>
+    <label class="flex flex-col gap-2">
+        <span class="text-sm font-medium">Anything else you'd like to share? (optional)</span>
+        <textarea
+            name="details"
+            rows="5"
+            placeholder="Tell us more..."
+            class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[15px] text-white outline-none placeholder:text-[#7f7f7f] focus:border-host/60"
+        ></textarea>
+    </label>
+    <button
+        type="submit"
+        class="min-h-12 rounded-xl bg-host-strong font-semibold text-host-ink transition-opacity hover:opacity-90 disabled:opacity-50"
+    >
+        Send feedback
+    </button>
+    <p data-form-message role="status" class="hidden text-center text-sm"></p>
+</form>
+
+<script>
+    for (const form of document.querySelectorAll<HTMLFormElement>('[data-uninstall-form]')) {
+        const message = form.querySelector<HTMLParagraphElement>('[data-form-message]')!
+        const say = (text: string, ok: boolean) => {
+            message.textContent = text
+            message.className = `text-center text-sm ${ok ? 'text-host' : 'text-[#f15e6c]'}`
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault()
+            const data = new FormData(form)
+            const reason = data.get('reason')
+            if (!reason) {
+                say('Please pick a reason.', false)
+                return
+            }
+
+            try {
+                // Delivered by a Cloudflare Worker that lives outside this repo.
+                await fetch('/api/uninstall-feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason, details: data.get('details'), host: form.dataset.host })
+                })
+            } catch {
+                // Thank them either way; a failed send isn't something they can fix.
+            }
+            say('Thank you for your feedback!', true)
+            form.querySelector('button[type="submit"]')?.setAttribute('disabled', 'true')
+        })
+    }
+</script>

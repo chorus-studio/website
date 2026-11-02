@@ -5,11 +5,14 @@ import { LINKS, YOUTUBE_EARLY_ACCESS } from '../lib/site'
 interface Props {
     title: string
     description?: string
+    /** Pin the page to one extension (its install and uninstall pages); otherwise the visitor picks. */
+    host?: 'spotify' | 'youtube'
 }
 
 const {
     title,
-    description = 'Snips, presets, speed, EQ, reverb and more, inside Spotify and YouTube.'
+    description = 'Snips, presets, speed, EQ, reverb and more, inside Spotify and YouTube.',
+    host
 } = Astro.props
 const currentYear = new Date().getFullYear()
 
@@ -26,7 +29,7 @@ import '../styles/global.css'
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-host={host === 'youtube' ? 'youtube' : undefined}>
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -55,12 +58,17 @@ import '../styles/global.css'
             rel="stylesheet"
         />
 
-        <!-- The host (Spotify or YouTube) the page shows, before first paint: ?host= wins, then the last visit. -->
-        <script is:inline>
+        <!-- The host (Spotify or YouTube) the page shows, before first paint: a pinned page wins and is
+             remembered for the next visit, then ?host=, then the last visit. -->
+        <script is:inline define:vars={{ pinned: host ?? null }}>
             try {
-                const host =
-                    new URLSearchParams(location.search).get('host') || localStorage.getItem('chorus-host')
-                if (host === 'youtube') document.documentElement.dataset.host = 'youtube'
+                if (pinned) {
+                    localStorage.setItem('chorus-host', pinned)
+                } else {
+                    const choice =
+                        new URLSearchParams(location.search).get('host') || localStorage.getItem('chorus-host')
+                    if (choice === 'youtube') document.documentElement.dataset.host = 'youtube'
+                }
             } catch {}
         </script>
 

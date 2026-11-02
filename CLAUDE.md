@@ -40,7 +40,7 @@ The home page switches between Spotify and YouTube with the switch in the hero. 
 - **Svelte islands**: read the host with `useHost()` from `src/lib/host.svelte.ts` (it reports Spotify until mount so hydration matches the server HTML) and change it with `setHost()`.
 - **Links**: store, Discord and other URLs are in `src/lib/site.ts`. A Firefox visitor's store buttons (`data-store-link`) are pointed at Firefox Add-ons by a script in `Landing.astro`.
 - **Media**: the clips in `public/media/` are cut from the Spotify extension's Remotion promo (`../extension/promo`). The `-yt` clips are the same footage recoloured red with ffmpeg, a stand-in until a real YouTube cut exists.
-- **Routes**: `/install` and `/uninstall` are hard-coded in the Spotify extension and must keep working. The YouTube extension hard-codes `/youtube/install` and `/youtube/uninstall`.
+- **Routes**: `/install` and `/uninstall` are hard-coded in the Spotify extension and must keep working. The YouTube extension hard-codes `/youtube/install` and `/youtube/uninstall` (`src/pages/youtube/`). These pages pass `host` to `Landing.astro`, which pins the page to that extension and remembers it for the visitor's next visit to the home page.
 
 ### Motion
 Shared keyframes live in `global.css`, used through arbitrary utilities (`animate-[marquee_48s_linear_infinite]`). `.reveal` and `.popin` are scroll-driven entrances (no-ops where `animation-timeline` isn't supported). Animation is switched off under `prefers-reduced-motion` for anything inside `body.landing`. Islands use `src/lib/motion.ts`: `autoplay` (an attachment for muted looping clips), `visibility()` (to pause demo loops off screen) and `prefersReducedMotion()`.
@@ -52,7 +52,7 @@ Documentation lives in `src/content/docs/` as Markdown files. Blog posts are in 
 `changelog.astro` and `downloads.astro` fetch releases from `https://api.github.com/repos/chorus-studio/chorus/releases` at build time in their frontmatter. If the fetch fails, they gracefully degrade to a fallback message with a link to GitHub.
 
 ### Extension integration
-The Chorus browser extension's `background.ts` redirects users to `chorusstudio.org/install` on first install and sets `chorusstudio.org/uninstall` as the uninstall URL. The uninstall page has a client-side feedback form that POSTs to `/api/uninstall-feedback` — this Cloudflare Worker endpoint is **not in this repo** (deployed separately).
+The Chorus browser extension's `background.ts` redirects users to `chorusstudio.org/install` on first install and sets `chorusstudio.org/uninstall` as the uninstall URL. The uninstall page has a client-side feedback form that POSTs to `/api/uninstall-feedback` — this Cloudflare Worker endpoint is **not in this repo** (deployed separately). The YouTube extension does the same with `/youtube/install` and `/youtube/uninstall`; that uninstall page uses `src/components/UninstallForm.astro`, which adds `host: 'youtube'` to the payload so the Worker can tell the two apart. (The Spotify `/uninstall` page still has its own inline form and sends only `reason` and `details`.)
 
 ### Dual styling approach
 The layout chrome and the home page use the host tokens above for their accent and inline neutral hex values (e.g. `bg-[#121212]`, `text-[#b3b3b3]`). The older Landing pages (`install`, `uninstall`, `changelog`, `downloads`, `demo`) still inline the old Spotify green (`bg-[#1db954]`). Starlight pages use CSS custom properties (`--sl-color-accent-*`) defined in `src/styles/global.css`.
@@ -73,4 +73,4 @@ The Starlight sidebar is manually configured in `astro.config.mjs`. The Features
 
 ## Landing Layout Props
 
-`src/layouts/Landing.astro` accepts `title` (required) and `description` (optional, defaults to the Chorus tagline). It provides a sticky floating nav (links collapse into a `<details>` menu below `md`), `<slot />` for page content, and a footer with Spotify, YouTube and More columns. Nav links point at home-page anchors (`/#presets`, `/#looks`, …), so they work from every page.
+`src/layouts/Landing.astro` accepts `title` (required), `description` (optional, defaults to the Chorus tagline) and `host` (optional, `'spotify'` or `'youtube'`, pins the page to one extension). It provides a sticky floating nav (links collapse into a `<details>` menu below `md`), `<slot />` for page content, and a footer with Spotify, YouTube and More columns. Nav links point at home-page anchors (`/#presets`, `/#looks`, …), so they work from every page.
